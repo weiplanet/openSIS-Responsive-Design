@@ -41,31 +41,6 @@ $_openSIS['allow_edit'] = true;
 unset($_SESSION['_REQUEST_vars']['assignment_type_id']);
 unset($_SESSION['_REQUEST_vars']['assignment_id']);
 
-//$config_RET = DBGet(DBQuery('SELECT TITLE,VALUE FROM program_user_config WHERE USER_ID=\''.User('STAFF_ID').'\' AND PROGRAM=\'Gradebook\'  AND SCHOOL_ID='.UserSchool().''),array(),array('TITLE'));
-////if(count($config_RET))
-////	foreach($config_RET as $title=>$value)
-////		$programconfig[$title] = rtrim($value[1]['VALUE'],'_'.UserCoursePeriod());
-////else
-////	$programconfig = true;
-//
-//if(count($config_RET))
-//{
-//	foreach($config_RET as $title=>$value)
-//		 if(substr($title,0,3)=='SEM' || substr($title,0,2)=='FY' || substr($title,0,1)=='Q')
-//            {
-//                $value1= explode("_",$value[1]['VALUE']);
-//                $programconfig[$title] = $value1[0];
-//            }
-// else {
-//     $value1= explode("_".UserCoursePeriod(),$value[1]['VALUE']);
-//     if(count($value1)>1)
-//      $programconfig[$title] = $value1[0];
-//else
-//    $programconfig[$title] = $value[1]['VALUE'];
-// }
-//}
-
-
 $config_RET = DBGet(DBQuery('SELECT TITLE,VALUE FROM program_user_config WHERE USER_ID=\''.User('STAFF_ID').'\' AND school_id=\''.UserSchool().'\' AND PROGRAM=\'Gradebook\' AND value like "%_'.UserCoursePeriod().'%"'),array(),array('TITLE'));
 if(count($config_RET))
 {
@@ -97,9 +72,10 @@ if(clean_param($_REQUEST['day_tables'],PARAM_NOTAGS) && ($_POST['day_tables'] ||
 if(clean_param($_REQUEST['tables'],PARAM_NOTAGS) && ($_POST['tables'] || $_REQUEST['ajax']))
 {
         $redirect_now='n';
-    $table = $_REQUEST['table'];
-        $err=false;
+    $table = trim($_REQUEST['table']);
+        $err= false;
         $f=0;
+
 	foreach($_REQUEST['tables'] as $id=>$columns)
 	{
 		if($table=='gradebook_assignment_types' && substr($programconfig['WEIGHT'],0,1)=='Y' && $columns['FINAL_GRADE_PERCENT']!='')
@@ -140,19 +116,19 @@ if(clean_param($_REQUEST['tables'],PARAM_NOTAGS) && ($_POST['tables'] || $_REQUE
                                                {
                                                  if(strtotime($columns['DUE_DATE'])<$cud_sd || strtotime($columns['DUE_DATE'])>$cud_ed )
                                                  {
-                                                     $msg='<Font color=red> Due date must be within the current marking periods start date and end date.</FONT>';
-                                                     $err=true;
+                                                     $msg='<Font color=red> '._dueDateMustBeWithinTheCurrentMarkingPeriodsStartDateAndEndDate.'.</FONT>';
+                                                     $err= true;
                                                      $err_ck=1;
                                                        break ;
                                                  }
                                                 else if(strtotime($columns['DUE_DATE'])<strtotime($due_date_sql[1]['ASSIGNED_DATE']) && $due_date_sql[1]['ASSIGNED_DATE']!='')
                                                     {
-                                                      $err=true;
+                                                      $err= true;
                                     continue;
                                                     }
                                                     elseif(strtotime($columns['DUE_DATE'])<strtotime($columns['ASSIGNED_DATE']))
                                                      {
-                                                        $err=true;
+                                                        $err= true;
                                     continue;
                                 }
                                                }
@@ -161,14 +137,14 @@ if(clean_param($_REQUEST['tables'],PARAM_NOTAGS) && ($_POST['tables'] || $_REQUE
                                         { 
                                         if(strtotime($columns['DUE_DATE'])<strtotime($due_date_sql[1]['ASSIGNED_DATE']) && $due_date_sql[1]['ASSIGNED_DATE']!='')
                                         {
-                                            $err=true;
+                                            $err= true;
                                             
                                     continue;
                                 }
 
                                        if(strtotime($columns['DUE_DATE'])<strtotime($columns['ASSIGNED_DATE']))
                                                      {
-                                                        $err=true;
+                                                        $err= true;
                                     continue;
                                 }
                             }
@@ -181,19 +157,19 @@ if(clean_param($_REQUEST['tables'],PARAM_NOTAGS) && ($_POST['tables'] || $_REQUE
                                                {
                                                  if(strtotime($columns['ASSIGNED_DATE'])<$cud_sd || strtotime($columns['ASSIGNED_DATE'])>$cud_ed )
                                                  {
-                                                     $msg='<Font color=red> Assigned date must be within the current marking periods start date and end date.</FONT>';
-                                                     $err=true;
+                                                     $msg='<Font color=red> '._assignedDateMustBeWithinTheCurrentMarkingPeriodsStartDateAndEndDate.'.</FONT>';
+                                                     $err= true;
                                                      $err_ck=1;
                                                     break ;
                                                  }
                                                 else  if(strtotime($due_date_sql[1]['DUE_DATE'])<strtotime($columns['ASSIGNED_DATE']) && $due_date_sql[1]['DUE_DATE']!='')
                                                       {
-                                                        $err=true;
+                                                        $err= true;
                                     continue;
                                                       }
                                                      elseif(strtotime($columns['DUE_DATE'])<strtotime($columns['ASSIGNED_DATE']))
                                                      {
-                                                        $err=true;
+                                                        $err= true;
                                     continue;
                                 }
                                                }
@@ -202,38 +178,40 @@ if(clean_param($_REQUEST['tables'],PARAM_NOTAGS) && ($_POST['tables'] || $_REQUE
                                         { 
                                         if(strtotime($due_date_sql[1]['DUE_DATE'])<strtotime($columns['ASSIGNED_DATE']) && $due_date_sql[1]['DUE_DATE']!='')
                                         {
-                                            $err=true;
+                                            $err= true;
                                     continue;
                                         }
                                         elseif(strtotime($columns['DUE_DATE'])<strtotime($columns['ASSIGNED_DATE']))
                                                      {
-                                                        $err=true;
+                                                        $err= true;
                                     continue;
                                 }
                             }
                         }
                     }
 
-                                if((($column=='ASSIGNED_DATE'&& $value!='' && $due_date_sql[1]['ASSIGNED_DATE']!=$value) ||($column=='DUE_DATE'&& $value!='' && $due_date_sql[1]['DUE_DATE']!=$value) ) && $table=='gradebook_assignments')
-                                {
+                    if((($column=='ASSIGNED_DATE'&& $value!='' && $due_date_sql[1]['ASSIGNED_DATE']!=$value) ||($column=='DUE_DATE'&& $value!='' && $due_date_sql[1]['DUE_DATE']!=$value) ) && $table=='gradebook_assignments')
+                    {
 
-$grade_assign_qr=  DBGet(DBQuery('SELECT COUNT(STUDENT_ID) AS TOT FROM   student_report_card_grades WHERE  COURSE_PERIOD_ID='.$course_period_id.' and marking_period_id='.UserMP().''));
+                        // $grade_assign_qr = DBGet(DBQuery('SELECT COUNT(STUDENT_ID) AS TOT FROM   student_report_card_grades WHERE  COURSE_PERIOD_ID='.$course_period_id.' and marking_period_id='.UserMP().''));
+                        $grade_assign_qr = DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   gradebook_grades WHERE ASSIGNMENT_ID = '".$_REQUEST['assignment_id']."'"));
                         if($grade_assign_qr[1]['TOT']>0)
                         {
                             $f=1;
-                            ShowErrPhp('Cannot modify the end date or start date because grade has been assigned to the student for this assignment.');
+                            ShowErrPhp(''._cannotModifyTheEndDateOrStartDateBecauseGradeHasBeenAssignedToTheStudentForThisAssignment.'.');
                         }
                     }
 
 
-                                     if($column=='POINTS' && $value!='' && $table=='gradebook_assignments')
-                                {
+                    if($column=='POINTS' && $value!='' && $table=='gradebook_assignments')
+                    {
 
-$grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student_report_card_grades WHERE COURSE_PERIOD_ID='$course_period_id'"));
+                        // $grade_assign_qr = DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student_report_card_grades WHERE COURSE_PERIOD_ID='$course_period_id'"));
+                        $grade_assign_qr = DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   gradebook_grades WHERE ASSIGNMENT_ID = '".$_REQUEST['assignment_id']."'"));
                         if($grade_assign_qr[1]['TOT']>0)
                         {
                             $f=1;
-                            ShowErrPhp('Cannot modify the points because grade has been assigned to the student for this assignment.');
+                            ShowErrPhp(''._cannotModifyThePointsBecauseGradeHasBeenAssignedToTheStudentForThisAssignment.'.');
                         }
                     }
                                 if($column=='DESCRIPTION' && $value!='' && $table=='gradebook_assignments')
@@ -271,7 +249,7 @@ $grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student
 		}
 		else
 		{
-                ShowErrPhp('Title Cannot be Blank');
+                ShowErrPhp(''._titleCannotBeBlank.'');
             }
 		}
 		else
@@ -331,7 +309,7 @@ $grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student
                                 {   
                                     if(strtotime($columns['DUE_DATE'])<strtotime($columns['ASSIGNED_DATE']))
                                     {
-                                        $err=true;
+                                        $err= true;
                         break 2;
                     }
                 }
@@ -353,7 +331,8 @@ $grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student
                     }
 					$fields .= $column.',';
 
-					$values .= '\''.str_replace("'","''",$value).'\',';
+					$values .= '\''.singleQuoteReplace("'","''",$value).'\',';
+                        
                     $go = true;
                 }
             }
@@ -381,11 +360,11 @@ $grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student
 
 
                          if(strtotime($columns['DUE_DATE'])>$cud_sd && strtotime($columns['DUE_DATE'])<=$cud_ed && strtotime($columns['ASSIGNED_DATE'])>=$cud_sd && strtotime($columns['ASSIGNED_DATE'])<$cud_ed)
-                            $go=true;
+                            $go= true;
                         else
                         {
-                            $msg='<Font color=red>Assigned date and due date must be within  course periods start date and end date.</FONT>';
-                            $go=false;
+                            $msg='<Font color=red>'._assignedDateAndDueDateMustBeWithinCoursePeriodsStartDateAndEndDate.'.</FONT>';
+                            $go= false;
                         $_REQUEST['assignment_id'] = 'new';
                     }
 
@@ -397,11 +376,11 @@ $grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student
                            
                             
                         if(strtotime($columns['DUE_DATE'])>=$s_d && strtotime($columns['DUE_DATE'])<=$e_d && strtotime($columns['ASSIGNED_DATE'])>=$s_d && strtotime($columns['ASSIGNED_DATE'])<$e_d)
-                            $go=true;
+                            $go= true;
                         else
                         {
-                            $msg='<Font color=red>Assigned date and due date must be within the current marking periods start date and end date.</FONT>';
-                            $go=false;
+                            $msg='<Font color=red>'._assignedDateAndDueDateMustBeWithinTheCurrentMarkingPeriodsStartDateAndEndDate.'.</FONT>';
+                            $go= false;
                         $_REQUEST['assignment_id'] = 'new';
                     }
                 }
@@ -413,11 +392,11 @@ $grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student
                        {
 
                          if(strtotime($columns['DUE_DATE'])>$cud_sd && strtotime($columns['DUE_DATE'])<=$cud_ed)
-                            $go=true;
+                            $go= true;
                         else
                         {
-                            $msg='<Font color=red>Due date must be within the course period start date and end date.</FONT>';
-                            $go=false;
+                            $msg='<Font color=red>'._dueDateMustBeWithinTheCoursePeriodStartDateAndEndDate.'.</FONT>';
+                            $go= false;
                         $_REQUEST['assignment_id'] = 'new';
                     }
                           
@@ -426,11 +405,11 @@ $grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student
                         else
                         {
                         if(strtotime($columns['DUE_DATE'])>$s_d && strtotime($columns['DUE_DATE'])<=$e_d)
-                            $go=true;
+                            $go= true;
                         else
                         {
-                            $msg='<Font color=red>Due date must be within the current marking period start date and end date.</FONT>';
-                            $go=false;
+                            $msg='<Font color=red>'._dueDateMustBeWithinTheCurrentMarkingPeriodStartDateAndEndDate.'.</FONT>';
+                            $go= false;
                         $_REQUEST['assignment_id'] = 'new';
                     }
                 }
@@ -442,11 +421,11 @@ $grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student
                        {
 
                          if(strtotime($columns['ASSIGNED_DATE'])>=$cud_sd && strtotime($columns['ASSIGNED_DATE'])<$cud_ed)
-                            $go=true;
+                            $go= true;
                         else
                         {
-                            $msg='<Font color=red>Assigned date and due date must be within the current marking period start date and end date.</FONT>';
-                            $go=false;
+                            $msg='<Font color=red>'._assignedDateAndDueDateMustBeWithinTheCurrentMarkingPeriodStartDateAndEndDate.'.</FONT>';
+                            $go= false;
                         $_REQUEST['assignment_id'] = 'new';
                     }
                           
@@ -455,11 +434,11 @@ $grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student
                         else
                         {
                         if(strtotime($columns['ASSIGNED_DATE'])>=$s_d && strtotime($columns['ASSIGNED_DATE'])<$e_d)
-                            $go=true;
+                            $go= true;
                         else
                         {
-                            $msg='<Font color=red>Assigned date must be within the current marking period start date and end date.</FONT>';
-                            $go=false;
+                            $msg='<Font color=red>'._assignedDateMustBeWithinTheCurrentMarkingPeriodStartDateAndEndDate.'.</FONT>';
+                            $go= false;
                         $_REQUEST['assignment_id'] = 'new';
                     }
                 }
@@ -488,11 +467,11 @@ $grade_assign_qr=  DBGet(DBQuery("SELECT COUNT(STUDENT_ID) AS TOT FROM   student
                 }
                     else
                         DBQuery ($sql);
-            DBQuery('UPDATE gradebook_assignments SET UNGRADED=2 WHERE ASSIGNMENT_ID IN (SELECT ASSIGNMENT_ID FROM gradebook_grades WHERE POINTS IS NULL OR POINTS=\'\') OR ASSIGNMENT_ID NOT IN (SELECT ASSIGNMENT_ID FROM gradebook_grades WHERE POINTS IS NOT NULL OR POINTS!=\'\')');
+//            DBQuery('UPDATE gradebook_assignments SET UNGRADED=2 WHERE ASSIGNMENT_ID IN (SELECT ASSIGNMENT_ID FROM gradebook_grades WHERE POINTS IS NULL OR POINTS=\'\') OR ASSIGNMENT_ID NOT IN (SELECT ASSIGNMENT_ID FROM gradebook_grades WHERE POINTS IS NOT NULL OR POINTS!=\'\')');
         }
                 if($msg)
                 {
-                    echo '<b>'.$msg.'</b>';
+                    echo '<div class="alert alert-danger no-border">'.$msg.'</div>';
         }
     }
     unset($_REQUEST['tables']);
@@ -512,7 +491,7 @@ if($err)
     $_REQUEST['ajax'] = true;
      if($err_ck!=1)
     {
-        echo '<Font color=red>Due date must be greater than assigned date.</FONT>';
+        echo '<Font color=red>'._dueDateMustBeGreaterThanAssignedDate.'.</FONT>';
     }
 }
 
@@ -523,10 +502,14 @@ if(clean_param($_REQUEST['modfunc'],PARAM_ALPHAMOD)=='delete')
         {
          if($_REQUEST['assignment_type_id'] && !$_REQUEST['assignment_id'])
         {   
-         $table ='assignment type';
-         $data=DBGet(DBQuery('select id from student_report_card_grades where course_period_id=(select course_period_id from  gradebook_assignment_types where assignment_type_id='.$_REQUEST['assignment_type_id'].')'));
+         $table =_assignmentType;
+       
+        //   $data=DBGet(DBQuery('select id from student_report_card_grades where course_period_id=(select course_period_id from  gradebook_assignment_types where assignment_type_id='.$_REQUEST['assignment_type_id'].')'));
+        
+        $data=DBGet(DBQuery('select id from student_report_card_grades where course_period_id=(select course_period_id from  gradebook_assignments where assignment_type_id='.$_REQUEST['assignment_type_id'].')'));
+        
          if(count($data)>0)
-             UnableDeletePromptMod('Gradebook Assignment Type cannot be deleted because assignments are created in this assignment type.','','modfunc=&assignment_type_id='.$_REQUEST['assignment_type_id']);
+             UnableDeletePromptMod(''._gradebookAssignmentTypeCannotBeDeletedBecauseAssignmentsAreCreatedInThisAssignmentType.'.','','modfunc=&assignment_type_id='.$_REQUEST['assignment_type_id']);
         else
         {
          if(DeletePromptAssignment(ucfirst($table), $_REQUEST['assignment_type_id']))
@@ -560,7 +543,7 @@ if(clean_param($_REQUEST['modfunc'],PARAM_ALPHAMOD)=='delete')
      $stmt = DBGet(DBQuery("SELECT id  AS TOTAL_ASSIGNED from student_report_card_grades WHERE course_period_id=".UserCoursePeriod()." and marking_period_id in($mp_id)"));
      $has_assigned=$stmt[1]['TOTAL_ASSIGNED'];
 		if($has_assigned>0){
-                    UnableDeletePromptMod('Gradebook Assignment cannot be deleted because grade was given for this assignment.','','modfunc=&assignment_type_id='.$_REQUEST['assignment_type_id'].'&assignment_id='.$_REQUEST['assignment_id']);
+                    UnableDeletePromptMod(''._gradebookAssignmentCannotBeDeletedBecauseGradeWasGivenForThisAssignment.'.','','modfunc=&assignment_type_id='.$_REQUEST['assignment_type_id'].'&assignment_id='.$_REQUEST['assignment_id']);
 		}else{
 		if(DeletePromptAssignment(ucfirst($table), $_REQUEST['assignment_type_id']))
 			{
@@ -594,18 +577,18 @@ if(!$_REQUEST['modfunc'] && $course_id)
     $QI = DBQuery($sql);
         
     $types_RET = DBGet($QI);
-        $counter_i=count($types_RET);
-        $others=DBGet(DBQuery('SELECT * FROM gradebook_assignments WHERE COURSE_ID='.UserCourse().' AND COURSE_PERIOD_ID!='.UserCoursePeriod()));
-        foreach($others as $o)
-        {
-            $counter_i++;
-            $gat=DBGet(DBQuery('SELECT * FROM gradebook_assignment_types WHERE ASSIGNMENT_TYPE_ID='.$o['ASSIGNMENT_TYPE_ID']));
-            $types_RET[$counter_i]['ASSIGNMENT_TYPE_ID']=$gat[1]['ASSIGNMENT_TYPE_ID'];
-            $types_RET[$counter_i]['TITLE']=$gat[1]['TITLE'];
-        }
+//        $counter_i=count($types_RET);
+//        $others=DBGet(DBQuery('SELECT * FROM gradebook_assignments WHERE COURSE_ID='.UserCourse().' AND COURSE_PERIOD_ID!='.UserCoursePeriod()));
+//        foreach($others as $o)
+//        {
+//            $counter_i++;
+//            $gat=DBGet(DBQuery('SELECT * FROM gradebook_assignment_types WHERE ASSIGNMENT_TYPE_ID='.$o['ASSIGNMENT_TYPE_ID']));
+//            $types_RET[$counter_i]['ASSIGNMENT_TYPE_ID']=$gat[1]['ASSIGNMENT_TYPE_ID'];
+//            $types_RET[$counter_i]['TITLE']=$gat[1]['TITLE'];
+//        }
 	if($_REQUEST['assignment_id']!='new' && $_REQUEST['assignment_type_id']!='new')
         {
-		$delete_button = "<INPUT type=button value=Delete class='btn btn-danger' onClick='javascript:window.location=\"Modules.php?modname=$_REQUEST[modname]&modfunc=delete&assignment_type_id=$_REQUEST[assignment_type_id]&assignment_id=$_REQUEST[assignment_id]\"'> &nbsp;";
+		$delete_button = "<INPUT type=button value="._delete." class='btn btn-danger' onClick='javascript:window.location=\"Modules.php?modname=$_REQUEST[modname]&modfunc=delete&assignment_type_id=$_REQUEST[assignment_type_id]&assignment_id=$_REQUEST[assignment_id]\"'> &nbsp;";
     }
 
     // ADDING & EDITING FORM
@@ -634,7 +617,7 @@ if(!$_REQUEST['modfunc'] && $course_id)
 	}
 	elseif($_REQUEST['assignment_id']=='new')
 	{
-        $title = 'New Assignment';
+        $title = _newAssignment;
         $new = true;
 	}
 	elseif($_REQUEST['assignment_type_id']=='new')
@@ -645,7 +628,7 @@ if(!$_REQUEST['modfunc'] && $course_id)
         $QI = DBQuery($sql);
 		$RET = DBGet($QI,array('FINAL_GRADE_PERCENT'=>'_makePercent'));
         $RET = $RET[1];
-        $title = 'New Assignment Type';
+        $title = _newAssignmentType;
     }
 
 
@@ -657,31 +640,31 @@ if(!$_REQUEST['modfunc'] && $course_id)
             echo "&assignment_id=new";
         echo "&table=gradebook_assignments method=POST>";
         echo '<div class="panel panel-default">';
-        DrawHeader($title, $delete_button . '<INPUT type=submit class="btn btn-primary" value=Save onclick="formcheck_assignments();">');
+        DrawHeader($title, $delete_button . '<INPUT type=submit id="setupAssgnTypeBtnOne" class="btn btn-primary" value='._save.' onclick="formcheck_assignments(this);">');
         echo '<div class="panel-body">';
         echo "<INPUT type=hidden name=type_id value='$_REQUEST[assignment_id]' id=type_id>";
         $header .= '<div class="row">';
-        $header .= '<div class="col-md-6"><div class="form-group">' . TextInput($RET['TITLE'], 'tables[' . $_REQUEST['assignment_id'] . '][TITLE]', 'Title *', 'size=36') . '</div></div>';
+        $header .= '<div class="col-md-6"><div class="form-group">' . TextInput($RET['TITLE'], 'tables[' . $_REQUEST['assignment_id'] . '][TITLE]', ''._title.' *', 'size=36') . '</div></div>';
 
         if ($id == "new" || $_REQUEST['tab_id'] == "new" || $RET['POINTS'] == '')
             $extra = ' size=4 maxlength=5 onkeydown="return numberOnlyMod(event,this);" ';
         else
             $extra = ' size=4 maxlength=5 onkeydown=\"return numberOnlyMod(event,this);\"';
-        $header .= '<div class="col-md-6"><div class="form-group">' . TextInput($RET['POINTS'], 'tables[' . $_REQUEST['assignment_id'] . '][POINTS]', 'Points *' , $extra) . '</div></div>';
+        $header .= '<div class="col-md-6"><div class="form-group">' . TextInput($RET['POINTS'], 'tables[' . $_REQUEST['assignment_id'] . '][POINTS]', ''._points.' *' , $extra) . '</div></div>';
         $header .= '</div>';
 
         $header .= '<div class="row">';
         if ($_REQUEST['assignment_id'] == 'new')
-            $header .= '<div class="col-md-6"><div class="form-group"><label class="control-label col-lg-4 text-right">&nbsp;</label><div class="col-lg-8">' . CheckboxInputSwitch($RET['COURSE_ID'], 'tables[' . $_REQUEST['assignment_id'] . '][COURSE_ID]', 'Apply to all Periods for this Course', '', false, 'Yes', 'No', '', 'switch-success') . '</div></div></div>';
+            $header .= '<div class="col-md-6"><div class="form-group"><label class="control-label col-lg-4 text-right">&nbsp;</label><div class="col-lg-8">' . CheckboxInputSwitch($RET['COURSE_ID'], 'tables[' . $_REQUEST['assignment_id'] . '][COURSE_ID]', _applyToAllPeriodsForThisCourse, '', false, 'Yes', 'No', '', 'switch-success') . '</div></div></div>';
         foreach ($types_RET as $type)
             $assignment_type_options[$type['ASSIGNMENT_TYPE_ID']] = $type['TITLE'];
 
-        $header .= '<div class="col-md-6"><div class="form-group">' . SelectInput($RET['ASSIGNMENT_TYPE_ID'] ? $RET['ASSIGNMENT_TYPE_ID'] : $_REQUEST['assignment_type_id'], 'tables[' . $_REQUEST['assignment_id'] . '][ASSIGNMENT_TYPE_ID]', 'Assignment Type', $assignment_type_options, false) . '</div></div>';
+        $header .= '<div class="col-md-6"><div class="form-group">' . SelectInput($RET['ASSIGNMENT_TYPE_ID'] ? $RET['ASSIGNMENT_TYPE_ID'] : $_REQUEST['assignment_type_id'], 'tables[' . $_REQUEST['assignment_id'] . '][ASSIGNMENT_TYPE_ID]', _assignmentType, $assignment_type_options, false) . '</div></div>';
         $header .= '</div>';
 
         $header .= '<div class="row">';
-        $header .= '<div class="col-md-6"><div class="form-group"><label class="control-label col-lg-4 text-right">' . ($_REQUEST['assignment_id'] == 'new' ? 'Assigned <span class="text-danger">*</span>' : 'Assigned Date  <span class="text-danger">*</span>') . '</label><div class="col-lg-8">' . DateInputAY($new && Preferences('DEFAULT_ASSIGNED', 'Gradebook') == 'Y' ? date('Y-m-d') : $RET['ASSIGNED_DATE'], 'tables[' . $_REQUEST['assignment_id'] . '][ASSIGNED_DATE]', 1) . '</div></div></div>';
-        $header .= '<div class="col-md-6"><div class="form-group"><label class="control-label col-lg-4 text-right">' . ($_REQUEST['assignment_id'] == 'new' ? 'Due  <span class="text-danger">*</span>' : 'Due Date  <span class="text-danger">*</span>') . '</label>' . DateInputAY($new && Preferences('DEFAULT_DUE', 'Gradebook') == 'Y' ? date('Y-m-d') : $RET['DUE_DATE'], 'tables[' . $_REQUEST['assignment_id'] . '][DUE_DATE]', 2) . '</div></div>';
+        $header .= '<div class="col-md-6"><div class="form-group"><label class="control-label col-lg-4 text-right">' . ($_REQUEST['assignment_id'] == 'new' ? ''._assigned.' <span class="text-danger">*</span>' : ''._assigned.'  <span class="text-danger">*</span>') . '</label><div class="col-lg-8">' . DateInputAY($new && Preferences('DEFAULT_ASSIGNED', 'Gradebook') == 'Y' ? date('Y-m-d') : $RET['ASSIGNED_DATE'], 'tables[' . $_REQUEST['assignment_id'] . '][ASSIGNED_DATE]', 1) . '</div></div></div>';
+        $header .= '<div class="col-md-6"><div class="form-group"><label class="control-label col-lg-4 text-right">' . ($_REQUEST['assignment_id'] == 'new' ? ''._due.'  <span class="text-danger">*</span>' : ''._due.'  <span class="text-danger">*</span>') . '</label>' . DateInputAY($new && Preferences('DEFAULT_DUE', 'Gradebook') == 'Y' ? date('Y-m-d') : $RET['DUE_DATE'], 'tables[' . $_REQUEST['assignment_id'] . '][DUE_DATE]', 2) . '</div></div>';
         $header .= '</div>';
     }
     elseif ($_REQUEST['assignment_type_id']) {
@@ -691,15 +674,18 @@ if(!$_REQUEST['modfunc'] && $course_id)
             echo "&assignment_type_id=$_REQUEST[assignment_type_id]";
         echo " method=POST>";
         echo '<div class="panel panel-default">';
-        DrawHeader($title, $delete_button . '<INPUT type=submit class="btn btn-primary" value=Save onclick="formcheck_assignments();">');
+        DrawHeader($title, $delete_button . '<INPUT type=submit id="setupAssgnTypeBtnTwo" class="btn btn-primary" value='._save.' onclick="formcheck_assignments(this);">');
         echo '<div class="panel-body">';
+        
+        echo "<INPUT type=hidden name=type_id value='$_REQUEST[assignment_id]' id=type_id>";
+        
         $header .= '<div class="row">';
-        $header .= '<div class="col-md-6"><div class="form-group">' . TextInput($RET['TITLE'], 'tables[' . $_REQUEST['assignment_type_id'] . '][TITLE]', 'Title', 'size=36') . '</div></div>';
+        $header .= '<div class="col-md-6"><div class="form-group">' . TextInput($RET['TITLE'], 'tables[' . $_REQUEST['assignment_type_id'] . '][TITLE]', _title, 'size=36') . '</div></div>';
 
         if($programconfig['WEIGHT']=='Y'){
 
-            $header .= '<div class="col-md-6"><div class="form-group">' . TextInput($RET['FINAL_GRADE_PERCENT'], 'tables[' . $_REQUEST['assignment_type_id'] . '][FINAL_GRADE_PERCENT]', ($RET['FINAL_GRADE_PERCENT'] != 0 ? '' : '<FONT color=red>') . 'Weight Percent' . ($RET['FINAL_GRADE_PERCENT'] != 0 ? '' : '</FONT>')) . '</div></div>';
-            $header .= '<div class="col-md-6"><div class="form-group">' . NoInput($RET['TOTAL_PERCENT'] == 1 ? '100%' : '<FONT COLOR=red>' . (100 * $RET['TOTAL_PERCENT']) . '%</FONT>', 'Percent Total') . '</div></div>';
+            $header .= '<div class="col-md-6"><div class="form-group">' . TextInput($RET['FINAL_GRADE_PERCENT'], 'tables[' . $_REQUEST['assignment_type_id'] . '][FINAL_GRADE_PERCENT]', ($RET['FINAL_GRADE_PERCENT'] != 0 ? '' : '<FONT color=red>') . _weightPercent . ($RET['FINAL_GRADE_PERCENT'] != 0 ? '' : '</FONT>')) . '</div></div>';
+            $header .= '<div class="col-md-6"><div class="form-group">' . NoInput($RET['TOTAL_PERCENT'] == 1 ? '100%' : '<FONT COLOR=red>' . (100 * $RET['TOTAL_PERCENT']) . '%</FONT>', _percentTotal) . '</div></div>';
         }
         $header .= '</div>';
     } else
@@ -710,7 +696,7 @@ if(!$_REQUEST['modfunc'] && $course_id)
             echo $header;
             echo '<div class="row">';
             echo '<div class="col-md-12"><div class="form-group">';
-            echo '<label class="control-label col-xs-2 text-right">Description</label>';
+            echo '<label class="control-label col-xs-2 text-right">'._description.'</label>';
             echo '<div class="col-xs-10">';
                         
 //            $oFCKeditor = new FCKeditor('tables[' . $_REQUEST['assignment_id'] . '][DESCRIPTION]');
@@ -742,7 +728,7 @@ if(!$_REQUEST['modfunc'] && $course_id)
         echo '</div>'; //.panel
     }
     // DISPLAY THE MENU
-    $LO_options = array('save' => false, 'search' => false, 'add' => true);
+    $LO_options = array('save' =>false, 'search' =>false, 'add' =>true);
 
     echo '<div class="row">';
 
@@ -757,14 +743,14 @@ if(!$_REQUEST['modfunc'] && $course_id)
 
     echo '<div class="col-md-6">';
     echo '<div class="panel panel-default">';
-    $columns = array('TITLE' => 'Assignment Type');
+    $columns = array('TITLE' =>_assignmentType);
     $link = array();
     $link['TITLE']['link'] = "Modules.php?modname=$_REQUEST[modname]&modfunc=$_REQUEST[modfunc]";
     $link['TITLE']['variables'] = array('assignment_type_id' => 'ASSIGNMENT_TYPE_ID');
     $link['add']['link'] = "Modules.php?modname=$_REQUEST[modname]&assignment_type_id=new";
     $link['add']['first'] = 50000; // number before add link moves to top
 
-    ListOutput($types_RET, $columns, 'Assignment Type', 'Assignment Types', $link, array(), $LO_options);
+    ListOutput($types_RET, $columns,  _assignmentType, _assignmentTypes, $link, array(), $LO_options);
     echo '</div>'; //.panel
     echo '</div>'; //.col-md-6
     // ASSIGNMENTS
@@ -786,14 +772,14 @@ if(!$_REQUEST['modfunc'] && $course_id)
 
         echo '<div class="col-md-6">';
         echo '<div class="panel panel-default">';
-        $columns = array('TITLE' => 'Assignment');
+        $columns = array('TITLE' =>_assignment);
         $link = array();
         $link['TITLE']['link'] = "Modules.php?modname=$_REQUEST[modname]&assignment_type_id=$_REQUEST[assignment_type_id]";
         $link['TITLE']['variables'] = array('assignment_id' => 'ASSIGNMENT_ID');
         $link['add']['link'] = "Modules.php?modname=$_REQUEST[modname]&assignment_type_id=$_REQUEST[assignment_type_id]&assignment_id=new";
         $link['add']['first'] = 50000; // number before add link moves to top
 
-        ListOutput($assn_RET, $columns, 'Assignment', 'Assignments', $link, array(), $LO_options);
+        ListOutput($assn_RET, $columns,  _assignment, _assignments, $link, array(), $LO_options);
 
         echo '</div>'; //.panel
         echo '</div>'; //.col-md-6
@@ -802,7 +788,7 @@ if(!$_REQUEST['modfunc'] && $course_id)
     echo '</div>';
 }
 elseif (!$course_id)
-    echo '<BR>' . ErrorMessage(array('You don\'t have a course this period.'), 'error');
+    echo '<BR>' . ErrorMessage(array(''._youDonTHaveACourseThisPeriod.'.'), 'error');
 
 function _makePercent($value, $column) {
     return Percent($value, 2);

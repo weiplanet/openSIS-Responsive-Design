@@ -43,7 +43,6 @@ if(page && page!="index.php"){
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>openSIS Installer</title>
-        <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,400italic,600italic" rel="stylesheet" type="text/css">
         <link href="../assets/css/icons/fontawesome/styles.min.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="../assets/css/bootstrap.min.css">
         <link rel="stylesheet" href="assets/css/installer.css?v=<?php echo rand(000, 999); ?>" type="text/css" />
@@ -70,7 +69,7 @@ if(page && page!="index.php"){
                                                     <div class="text-center">
                                                         <img src="assets/images/warning.svg" width="50" />
                                                     </div><br/>
-                                                    <p>Please be advised that only openSIS-CE version 6.3 and above can be upgraded to the latest version using this installer. If you are running version 6.3 or above, click Continue to upgrade, otherwise click Go Back and try the New Installation.</p>
+                                                    <p>Please be advised that only openSIS-CE version 7.1 and above can be upgraded to the latest version using this installer. If you are running version 7.1 or above, click Continue to upgrade, otherwise click Go Back and try the New Installation.</p>
                                                     
                                                     <p class="text-danger"><b>Please Note:</b> Remember to backup your current database and keep it in a safe place
                                                         before attempting an upgrade. OS4ED will not be responsible for data

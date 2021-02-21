@@ -57,14 +57,14 @@ if ($_REQUEST['func'] == 'Basic') {
         $num_parent = $num_parent[1]['TOTAL_PARENTS'];
     echo '<div class="panel panel-default">';
     echo '<div class="tabbable">';
-    echo '<ul class="nav nav-tabs nav-tabs-bottom no-margin-bottom"><li class="active" id="tab[]"><a href="javascript:void(0);">At a Glance</a></li></ul>';
+    echo '<ul class="nav nav-tabs nav-tabs-bottom no-margin-bottom"><li class="active" id="tab[]"><a href="javascript:void(0);">'._atAGlance.'</a></li></ul>';
     echo '<div class="panel-body institute-report">';
     echo '<div class="row">';
     echo '<div class="col-md-4">';
     echo ' <div class="well m-b-15">';
     echo '<div class="media-left media-middle"><span class="institute-report-icon icon-school"></span></div>';
     echo '<div class="media-left">';
-    echo '<h6 class="text-semibold no-margin">Institutions<span class="display-block no-margin text-success">'.$num_schools.'</span></h6>';
+    echo '<h6 class="text-semibold no-margin">'._institutions.'<span class="display-block no-margin text-success">'.$num_schools.'</span></h6>';
     echo '</div>';
     echo '</div>'; //.well
     echo '</div>'; //.col-md-4
@@ -72,7 +72,7 @@ if ($_REQUEST['func'] == 'Basic') {
     echo ' <div class="well m-b-15">';
     echo '<div class="media-left media-middle"><span class="institute-report-icon icon-student"></span></div>';
     echo '<div class="media-left">';
-    echo '<h6 class="text-semibold no-margin">Students<span class="display-block no-margin text-success">'.$num_students.' <small class="no-margin">(Male : '.$male.'  &nbsp; | &nbsp;  Female : '.$female.')</small></span></h6>';
+    echo '<h6 class="text-semibold no-margin">'._students.'<span class="display-block no-margin text-success">'.$num_students.' <small class="no-margin">('._male.' : '.$male.'  &nbsp; | &nbsp;  '._female.' : '.$female.')</small></span></h6>';
     echo '</div>';
     echo '</div>'; //.well
     echo '</div>'; //.col-md-4
@@ -80,7 +80,7 @@ if ($_REQUEST['func'] == 'Basic') {
     echo ' <div class="well m-b-15">';
     echo '<div class="media-left media-middle"><span class="institute-report-icon icon-teacher"></span></div>';
     echo '<div class="media-left">';
-    echo '<h6 class="text-semibold no-margin">Teachers<span class="display-block no-margin text-success">'.$num_teacher.'</span></h6>';
+    echo '<h6 class="text-semibold no-margin">'._teachers.'<span class="display-block no-margin text-success">'.$num_teacher.'</span></h6>';
     echo '</div>';
     echo '</div>'; //.well
     echo '</div>'; //.col-md-4
@@ -90,7 +90,7 @@ if ($_REQUEST['func'] == 'Basic') {
     echo ' <div class="well m-b-15">';
     echo '<div class="media-left media-middle"><span class="institute-report-icon icon-staff"></span></div>';
     echo '<div class="media-left">';
-    echo '<h6 class="text-semibold no-margin">Staff<span class="display-block no-margin text-success">'.$num_staff.'</span></h6>';
+    echo '<h6 class="text-semibold no-margin">'._staff.'<span class="display-block no-margin text-success">'.$num_staff.'</span></h6>';
     echo '</div>';
     echo '</div>'; //.well
     echo '</div>'; //.col-md-4
@@ -98,18 +98,20 @@ if ($_REQUEST['func'] == 'Basic') {
     echo ' <div class="well m-b-15">';
     echo '<div class="media-left media-middle"><span class="institute-report-icon icon-parent"></span></div>';
     echo '<div class="media-left">';
-    echo '<h6 class="text-semibold no-margin">Parents<span class="display-block no-margin text-success">'.$num_parent.'</span></h6>';
+    echo '<h6 class="text-semibold no-margin">'._parents.'<span class="display-block no-margin text-success">'.$num_parent.'</span></h6>';
     echo '</div>';
     echo '</div>'; //.well
     echo '</div>'; //.col-md-4
     echo '</div>'; //.row
-//    echo '<div id="d"><TABLE align=center cellpadding=5 cellspacing=5>';
-//    echo '<tr><td><b>Number of Institutions</b></td><td>:</td><td>&nbsp ' . $num_schools . ' &nbsp </td></tr>';
-//    echo '<tr><td><b>Number of Students</b></td><td>:</td><td>&nbsp ' . $num_students . ' &nbsp </td><td> &nbsp Male : ' . $male . ' &nbsp| &nbspFemale : ' . $female . '</td></tr>';
-//    echo '<tr><td><b>Number of Teachers</b></td><td>:</td><td colspan=2>&nbsp ' . $num_teacher . '</td></tr>';
-//    echo '<tr><td><b>Number of Staff</b></td><td>:</td><td colspan=2>&nbsp ' . $num_staff . '</td></tr>';
-//    echo '<tr><td><b>Number of Parents</b></td><td>:</td><td colspan=2>&nbsp ' . $num_parent . '</td></tr>';
-//    echo '</TABLE></div>';
+
+    //    echo '<div id="d"><TABLE align=center cellpadding=5 cellspacing=5>';
+    //    echo '<tr><td><b>Number of Institutions</b></td><td>:</td><td>&nbsp ' . $num_schools . ' &nbsp </td></tr>';
+    //    echo '<tr><td><b>Number of Students</b></td><td>:</td><td>&nbsp ' . $num_students . ' &nbsp </td><td> &nbsp Male : ' . $male . ' &nbsp| &nbspFemale : ' . $female . '</td></tr>';
+    //    echo '<tr><td><b>Number of Teachers</b></td><td>:</td><td colspan=2>&nbsp ' . $num_teacher . '</td></tr>';
+    //    echo '<tr><td><b>Number of Staff</b></td><td>:</td><td colspan=2>&nbsp ' . $num_staff . '</td></tr>';
+    //    echo '<tr><td><b>Number of Parents</b></td><td>:</td><td colspan=2>&nbsp ' . $num_parent . '</td></tr>';
+    //    echo '</TABLE></div>';
+
     echo '</div>';
     echo '</div>';//.tabbable
     echo '</div>';//.panel
@@ -118,7 +120,7 @@ if ($_REQUEST['func'] == 'Basic') {
 if ($_REQUEST['func'] == 'Ins_r') {
     if (clean_param($_REQUEST['modfunc'], PARAM_ALPHAMOD) == 'save') {
         echo "<table width=100%  style=\" font-family:Arial; font-size:12px;\" >";
-        echo "<tr><td width=105>" . DrawLogo() . "</td><td style=\"font-size:15px; font-weight:bold; padding-top:20px;\">Institute Reports</td><td align=right style=\"padding-top:20px;\">" . ProperDate(DBDate()) . "<br />Powered by openSIS</td></tr><tr><td colspan=3 style=\"border-top:1px solid #333;\">&nbsp;</td></tr></table>";
+        echo "<tr><td width=105>" . DrawLogo() . "</td><td style=\"font-size:15px; font-weight:bold; padding-top:20px;\">"._instituteReports."</td><td align=right style=\"padding-top:20px;\">" . ProperDate(DBDate()) . "<br />"._poweredByOpenSis."</td></tr><tr><td colspan=3 style=\"border-top:1px solid #333;\">&nbsp;</td></tr></table>";
         echo "<table >";
 
 
@@ -177,8 +179,7 @@ if ($_REQUEST['func'] == 'Ins_r') {
                 }
             }
             echo '<br>';
-            // print_r($arr);print_r($arr);
-            // echo 'SELECT ID,' . $columns . ' FROM schools';
+            
             $get_school_info = DBGet(DBQuery('SELECT ID,' . $columns . ' FROM schools'));
 
             echo '<br>';
@@ -219,7 +220,17 @@ if ($_REQUEST['func'] == 'Ins_r') {
         echo '<DIV id=fields_div></DIV>';
         echo '<br/>';
 
-        $fields_list['Available School Fields'] = array('TITLE' => 'School Name', 'ADDRESS' => 'Address', 'CITY' => 'City', 'STATE' => 'State', 'ZIPCODE' => 'Zipcode', 'PHONE' => 'Telephone', 'PRINCIPAL' => 'Principal', 'REPORTING_GP_SCALE' => 'Base Grading Scale', 'E_MAIL' => 'Email', 'WWW_ADDRESS' => 'Website');
+        $fields_list['Available School Fields'] = array('TITLE' => _schoolName,
+         'ADDRESS' => _address,
+         'CITY' => _city,
+         'STATE' => _state,
+         'ZIPCODE' => _zipcode,
+         'PHONE' => _telephone,
+         'PRINCIPAL' => _principal,
+         'REPORTING_GP_SCALE' => _baseGradingScale,
+         'E_MAIL' => _email,
+         'WWW_ADDRESS' => _website,
+        );
         $get_schools_cf = DBGet(DBQuery('SELECT * FROM school_custom_fields'));
         if (count($get_schools_cf) > 0) {
             foreach ($get_schools_cf as $gsc) {
@@ -228,7 +239,7 @@ if ($_REQUEST['func'] == 'Ins_r') {
         }        
 	echo '<div class="row">';
         echo '<div class="col-md-8">';
-        PopTable('header','<i class=\"glyphicon glyphicon-tasks\"></i> &nbsp;Select Fields To Generate Report');
+        PopTable('header','<i class=\"glyphicon glyphicon-tasks\"></i> &nbsp;'._selectFieldsToGenerateReport.'');
 
         foreach ($fields_list as $category => $fields) {
 
@@ -259,11 +270,11 @@ if ($_REQUEST['func'] == 'Ins_r') {
         }
         PopTable('footer');
         echo '</div><div class="col-md-4">';
-        PopTable("header","<i class=\"glyphicon glyphicon-saved\"></i> &nbsp;Selected Fields");
-        echo '<div id="names_div_none" class="error_msg" style="padding:6px 0px 0px 6px;">No fields selected</div><ol id=names_div class="selected_report_list"></ol>';
+        PopTable("header","<i class=\"glyphicon glyphicon-saved\"></i> &nbsp;"._selectedFields);
+        echo '<div id="names_div_none" class="error_msg" style="padding:6px 0px 0px 6px;">'._noFieldsSelected.'</div><ol id=names_div class="selected_report_list"></ol>';
         
-        echo '<BR><CENTER><INPUT type=submit value=\'Create Report for Institutes\' class="btn btn-primary"></CENTER>';
-        PopTable('footer');
+        $btn = '<INPUT type=submit value=\''._createReportForInstitutes.'\' class="btn btn-primary">';
+        PopTable('footer', $btn);
         echo '</div>'; //.col-md-6
         echo '</div>'; //.row
         echo "</FORM>";
@@ -310,10 +321,16 @@ if ($_REQUEST['func'] == 'Ins_cf') {
         $get_schools_cf[$g_i]['C_VALUE'] = $gt_fld_v[1]['FIELD'];
     }
 
-    $column = array('SCHOOL' => 'School', 'TYPE' => 'Custom Field Type', 'TITLE' => 'Custom Field Name', 'SELECT_OPTIONS' => 'Options', 'SYSTEM_FIELD' => 'System Field', 'REQUIRED' => 'Required Field');
+    $column = array('SCHOOL' => _school,
+     'TYPE' => _customFieldType,
+     'TITLE' => _customFieldName,
+     'SELECT_OPTIONS' => _options,
+     'SYSTEM_FIELD' => _systemField,
+     'REQUIRED' => _requiredField,
+    );
 
     echo '<div class="panel panel-default">';
-    ListOutput($get_schools_cf, $column, 'Custom Field', 'Custom Fields');
+    ListOutput($get_schools_cf, $column, _customField, _customFields);
     echo '</div>';
 }
 ?>

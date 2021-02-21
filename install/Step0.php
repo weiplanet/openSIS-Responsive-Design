@@ -43,7 +43,6 @@ if(page && page!="index.php"){
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>openSIS Installer</title>
-        <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,400italic,600italic" rel="stylesheet" type="text/css">
         <link href="../assets/css/icons/fontawesome/styles.min.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="../assets/css/bootstrap.min.css">
         <link rel="stylesheet" href="assets/css/installer.css?v=<?php echo rand(000, 999); ?>" type="text/css" />
@@ -85,8 +84,8 @@ if(page && page!="index.php"){
                                             echo '</tr><tr>';
                                             echo '<td valign="middle" align="center"><a href="Step0.1.php?mod=upgrade"><img src="assets/images/icon-upgrade.png" alt="Upgrade OpenSIS" /><br/><h5 class="text-black"><b>Upgrade</b><br/><small>(From ver 4.7 thru 6.0)</small></h5></a></td>';
                                         } else {
-                                            echo '<td valign="middle" align="center"><a href="SystemCheck.php"><img src="assets/images/icon-package.png" alt="New Installation" /><br/><h5 class="text-black"><b>New Installation</b><br/><small>(Ver 7.2)</small></h5></a></td>';
-                                            echo '<td valign="middle" align="center"><a href="Step0.1.php?mod=upgrade"><img src="assets/images/icon-upgrade.png" alt="Upgrade OpenSIS"/><br/><h5 class="text-black"><b>Upgrade</b><br/><small>(From ver 6.3 thru 7.1)</small></h5></a></td>';
+                                            echo '<td valign="middle" align="center"><a href="SystemCheck.php"><img src="assets/images/icon-package.png" alt="New Installation" /><br/><h5 class="text-black"><b>New Installation</b><br/><small>(Ver 7.6)</small></h5></a></td>';
+                                            echo '<td valign="middle" align="center"><a href="Step0.1.php?mod=upgrade"><img src="assets/images/icon-upgrade.png" alt="Upgrade OpenSIS"/><br/><h5 class="text-black"><b>Upgrade</b><br/><small>(From ver 7.1 onwards)</small></h5></a></td>';
                                         }
                                         ?>
                                     </tr>

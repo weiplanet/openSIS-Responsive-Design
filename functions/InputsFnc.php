@@ -62,7 +62,7 @@ function SearchDateInput($day, $month, $year, $allow_day, $allow_month, $allow_y
 
     $dt.= '<div class="input-group datepicker-group" id="original_date_' . $day . '" value="" style="">';
     $dt.= '<span class="input-group-addon"><i class="icon-calendar22"></i></span>';
-    $dt.= '<input id="date_' . $day . '" placeholder="Select Date" value="" class="form-control daterange-single" type="text">';
+    $dt.= '<input id="date_' . $day . '" placeholder="'._selectDate.'" value="" class="form-control daterange-single" type="text">';
     $dt.= '</div>';
 
     $dt.= '<input value="" id="monthSelect_date_' . $day . '" name="' . $day . '" type="hidden">';
@@ -115,7 +115,7 @@ function SearchDateInputDob($day, $month, $year, $allow_day, $allow_month, $allo
 
     $dt.= '<div class="input-group datepicker-group-month-date" id="original_date_' . $day . '" value="" style="">';
     $dt.= '<span class="input-group-addon"><i class="icon-calendar22"></i></span>';
-    $dt.= '<input id="date_' . $day . '" placeholder="Select Date" value="" class="form-control daterange-single" type="text">';
+    $dt.= '<input id="date_' . $day . '" placeholder="'._selectDate.'" value="" class="form-control daterange-single" type="text">';
     $dt.= '</div>';
 
     $dt.= '<input value="" id="monthSelect_date_' . $day . '" name="' . $day . '" type="hidden">';
@@ -198,6 +198,38 @@ function TextInput($value, $name, $title = '', $options = '', $div = true, $divO
         $value = str_replace("'", '&#39;', str_replace('"', '&rdquo;', $value));
         $value1 = is_array($value) ? $value[1] : $value;
         $value = is_array($value) ? $value[0] : $value;
+        $dgei = 'document.getElementById(\"input$name\").focus();';
+
+        if (strpos($options, 'size') === false && $value != '')
+            $options .= ' size=' . strlen($value);
+        elseif (strpos($options, 'size') === false)
+            $options .= ' size=10';
+
+        if (strstr($value, '\\') != '')
+            $div = false;
+        if ((trim(str_replace("","",$value)) == '' || trim($div) == false))
+            return (($title != '') ? '<label for="' . $name . '" class="control-label text-right col-lg-4">' . str_replace('*', '<span class="text-danger">*</span>', $original_title) . '</label><div class="col-lg-8">' : '') . "<INPUT class=\"form-control\" type=text id=$name name=$name " . (($value || $value === '0') ? "value=\"$value\"" : '') . " $options>" . (($title != '') ? '</div>' : '');
+        else {
+
+            return (($title != '') ? '<label for="' . $name . '" class="control-label text-right col-lg-4">' . str_replace('*', '<span class="text-danger">*</span>', $original_title) . '</label><div class="col-lg-8">' : '') . "<DIV id='div$name'><div " . $divOptions . " onclick='javascript:addHTML(\"<INPUT type=text class=form-control id=input$name name=$name " . (($value || $value === '0') ? "value=\\\"" . str_replace('"', '&rdquo;', $value) . "\\\"" : '') . " $options>\",\"div$name\",true); document.getElementById(\"input$name\").focus();' readonly=\"readonly\" class=\"form-control\">" . $value . '</div></DIV>' . (($title != '') ? '</div>' : '');
+        }
+    } else {
+        $value = str_replace("'", '&#39;', str_replace('"', '&rdquo;', $value));
+        return ($title != '' ? '<label class="control-label text-right col-lg-4">' . $title . '</label><div class="col-lg-8">' : '') . '<div class="form-control" disabled=disabled>' . (((is_array($value) ? $value[1] : $value) != '') ? (is_array($value) ? $value[1] : $value) : '-') . '</div>' . ($title != '' ? '</div>' : '');
+    }
+}
+
+function TextInputPortal($value, $name, $title = '', $options = '', $div = true, $divOptions = '') {
+    $original_title = $title;
+    $title = str_replace('*', '', $original_title);
+    if (Preferences('HIDDEN') != 'Y')
+        $div = false;
+
+    // mab - support array style $option values
+    if (AllowEdit() && !$_REQUEST['_openSIS_PDF']) {
+        $value = str_replace("'", '&#39;', str_replace('"', '&rdquo;', $value));
+        $value1 = is_array($value) ? $value[1] : $value;
+        $value = is_array($value) ? $value[0] : $value;
 
         if (strpos($options, 'size') === false && $value != '')
             $options .= ' size=' . strlen($value);
@@ -211,7 +243,7 @@ function TextInput($value, $name, $title = '', $options = '', $div = true, $divO
             return (($title != '') ? '<label for="' . $name . '" class="control-label text-right col-lg-4">' . str_replace('*', '<span class="text-danger">*</span>', $original_title) . '</label><div class="col-lg-8">' : '') . "<INPUT class=\"form-control\" type=text id=$name name=$name " . (($value || $value === '0') ? "value=\"$value\"" : '') . " $options>" . (($title != '') ? '</div>' : '');
         else {
 
-            return (($title != '') ? '<label for="' . $name . '" class="control-label text-right col-lg-4">' . str_replace('*', '<span class="text-danger">*</span>', $original_title) . '</label><div class="col-lg-8">' : '') . "<DIV id='div$name'><div " . $divOptions . " onclick='javascript:addHTML(\"<INPUT type=text class=form-control id=input$name name=$name " . (($value || $value === '0') ? "value=\\\"" . str_replace('"', '&rdquo;', $value) . "\\\"" : '') . " $options>\",\"div$name\",true); document.getElementById(\"input$name\").focus();' readonly=\"readonly\" class=\"form-control\">" . $value . '</div></DIV>' . (($title != '') ? '</div>' : '');
+            return (($title != '') ? '<label for="' . $name . '" class="control-label text-right col-lg-4">' . str_replace('*', '<span class="text-danger">*</span>', $original_title) . '</label><div class="col-lg-8">' : '') . "<DIV id='div$name'><div " . $divOptions . " onclick='javascript:addHTML(\"<INPUT type=text class=form-control id=input$name name=$name " . (($value || $value === '0') ? "value=\\\"" . str_replace('"', '&rdquo;', $value) . "\\\"" : '') . " $options>\",\"div$name\",true); document.getElementById(\"input$name\").focus();' readonly=\"readonly\" class=\"form-control\">" . str_replace("\n", '\n', str_replace('"', '\"', addcslashes(str_replace("\r", '', (string)$value), "\0..\37'\\"))) . '</div></DIV>' . (($title != '') ? '</div>' : '');
         }
     } else {
         $value = str_replace("'", '&#39;', str_replace('"', '&rdquo;', $value));
@@ -346,7 +378,7 @@ function TextInput_mod_a($value, $name, $title = '', $options = '', $div = true)
         else
             return "<DIV id='div$name'><div onclick='javascript:addHTML(\"<INPUT type=text placeholder=\\\"" . $title . "\\\" class=form-control id=input$name name=$name " . (($value || $value === '0') ? "value=\\\"" . str_replace('"', '&rdquo;', $value) . "\\\"" : '') . " $options>" . ($title != '' ? $title : '') . "\",\"div$name\",true); document.getElementById(\"input$name\").focus();'>" . (($value != '') ? str_replace('"', '&rdquo;', $value1) : '-') . ($title != '' ? $title : '') . "</div></DIV>";
     } else
-        return (((is_array($value) ? $value[1] : $value) != '') ? (is_array($value) ? $value[1] : $value) : '-') . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '');
+        return (((is_array($value) ? $value[1] : $value) != '') ? (is_array($value) ? $value[1] : $value) : '-') . ($title != '' ? '<label class="control-label">' . $title . '</label>' : '');
 }
 
 function TextAreaInput($value, $name, $title = '', $options = '', $div = true) {
@@ -372,7 +404,7 @@ function TextAreaInput($value, $name, $title = '', $options = '', $div = true) {
         return (($value != '') ? nl2br($value) : '-') . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '');
 }
 
-function TextAreaInputInputFinalGrade($value, $name, $title = '', $options = '', $div = true) {
+function TextAreaInputPortal($value, $name, $title = '', $options = '', $div = true) {
     if (Preferences('HIDDEN') != 'Y')
         $div = false;
 
@@ -387,14 +419,39 @@ function TextAreaInputInputFinalGrade($value, $name, $title = '', $options = '',
         $cols = substr($options, strpos($options, 'cols') + 5, 2) * 1;
 
         if ($value == '' || $div == false)
-            return "<TEXTAREA name=$name $options>$value</TEXTAREA>" . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '');
+            return (($title != '') ? '<label class="control-label col-lg-4 text-right" for="' . $name . '">' . $title . '</label><div class="col-lg-8">' : '') . "<TEXTAREA class=form-control id=$name name=$name $options>$value</TEXTAREA>" . (($title != '') ? "</div>" : "");
         else
-            return "<DIV id='div$name'><div onclick='javascript:addHTML(\"<TEXTAREA id=textarea$name name=$name $options>" . preg_replace("[\n\r]", '\u000D\u000A', str_replace("\r\n", '\u000D\u000A', str_replace("'", "&#39;", $value))) . "</TEXTAREA>" . ($title != '' ? "<BR><small>" . str_replace("'", '&#39;', (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '')) . "</small>" : '') . "\",\"div$name\",true); document.getElementById(\"textarea$name\").value=unescape(document.getElementById(\"textarea$name\").value);'><TABLE class=LO_field ><TR><TD>" . ((substr_count($value, "\r\n") > $rows) ? '<DIV style="overflow:auto; height:' . (15 * $rows) . 'px; width:' . ($cols * 10) . '; padding-right: 16px;">' . nl2br($value) . '</DIV>' : '<DIV style="overflow:auto; width:300; padding-right: 16px;">' . nl2br($value) . '</DIV>') . '</TD></TR></TABLE>' . ($title != '' ? '<BR><small>' . str_replace("'", '&#39;', (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '')) . '</small>' : '') . '</div></DIV>';
+            return ($title != '' ? '<label class="control-label col-lg-4 text-right" for="' . $name . '">' . $title . '</label><div class="col-lg-8">' : '') . "<DIV id='div$name'><div class='form-control' readonly='readonly' onclick='javascript:addHTML(\"<TEXTAREA class=form-control id=textarea$name name=$name $options>" . str_replace("\n", '\n', str_replace('"', '\"', addcslashes(str_replace("\r", '', (string)$value), "\0..\37'\\"))) . "</TEXTAREA>" . "\",\"div$name\",true); document.getElementById(\"textarea$name\").value=unescape(document.getElementById(\"textarea$name\").value);'>" . ((substr_count($value, "\r\n") > $rows) ? '<DIV>' . nl2br($value) . '</DIV>' : '<DIV>' . nl2br($value) . '</DIV>') . '</div></DIV>' . (($title != '') ? "</div>" : "");
+//            return ($title != '' ? '<label class="control-label col-lg-4" for="' . $name . '">' . $title . '</label><div class="col-lg-8">' : '') . "<DIV id='div$name'><div onclick='javascript:addHTML(\"<TEXTAREA class=form-control placeholder=$title id=textarea$name name=$name $options>" . ereg_replace("[\n\r]", '\u000D\u000A', str_replace("\r\n", '\u000D\u000A', str_replace("'", "&#39;", $value))) . "</TEXTAREA>" . ($title != '' ? "<BR><small>" . str_replace("'", '&#39;', (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '')) . "</small>" : '') . "\",\"div$name\",true); document.getElementById(\"textarea$name\").value=unescape(document.getElementById(\"textarea$name\").value);'>" . ((substr_count($value, "\r\n") > $rows) ? '<DIV>' . nl2br($value) . '</DIV>' : '<DIV>' . nl2br($value) . '</DIV>') . '</div></DIV>' . (($title != '') ? "</div>" : "");
     } else
         return (($value != '') ? nl2br($value) : '-') . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '');
 }
 
-function CheckboxInput($value, $name, $title = '', $checked = '', $new = false, $yes = 'Yes', $no = 'No', $div = true, $extra = '') {
+function TextAreaInputInputFinalGrade($value, $name, $title = '', $options = '', $div = true) {
+    if (Preferences('HIDDEN') != 'Y')
+        $div = false;
+
+    if (AllowEdit() && !$_REQUEST['_openSIS_PDF']) {
+        $value = str_replace("'", '&#39;', str_replace('"', '&rdquo;', $value));
+        if (strpos($options, 'cols') === false)
+            $options .= ' cols=30';
+        if (strpos($options, 'rows') === false)
+            $options .= ' rows=4';
+        $rows = substr($options, strpos($options, 'rows') + 5, 2) * 1;
+        $cols = substr($options, strpos($options, 'cols') + 5, 2) * 1;
+
+        //htmlspecialchars: Convert special characters to HTML entities
+        $value=htmlspecialchars($value);
+        
+        if ($value == '' || $div == false)
+            return "<TEXTAREA class='form-control' name=$name $options>".htmlspecialchars_decode($value)."</TEXTAREA>" . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '');
+        else
+            return "<DIV id='div$name'><div onclick='javascript:addHTML(\"<TEXTAREA class=form-control id=textarea$name name=$name $options>" . preg_replace("[\n\r]", '\u000D\u000A', str_replace("\r\n", '\u000D\u000A', str_replace("'", "&#39;", $value))) . "</TEXTAREA>" . ($title != '' ? "<BR><small>" . str_replace("'", '&#39;', (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '')) . "</small>" : '') . "\",\"div$name\",true); document.getElementById(\"textarea$name\").value=unescape(document.getElementById(\"textarea$name\").value);'><TABLE class=LO_field ><TR><TD>" . ((substr_count($value, "\r\n") > $rows) ? '<DIV style="overflow:auto; height:' . (15 * $rows) . 'px; width:' . ($cols * 10) . '; padding-right: 16px;">' . nl2br(htmlspecialchars_decode($value)) . '</DIV>' : '<DIV style="overflow:auto; width:300; padding-right: 16px;">' . nl2br(htmlspecialchars_decode($value)) . '</DIV>') . '</TD></TR></TABLE>' . ($title != '' ? '<BR><small>' . str_replace("'", '&#39;', (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '')) . '</small>' : '') . '</div></DIV>';
+    } else
+        return ((($value) != '') ? nl2br(($value)) : '-') . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '');
+}
+
+function CheckboxInput($value, $name, $title = '', $checked = '', $new = false, $yes = _yes, $no = _no, $div = true, $extra = '') {
 
     if ($checked) {
         if (strpos($name, 'STANDARD_GRADE_SCALE'))
@@ -422,7 +479,7 @@ function CheckboxInput($value, $name, $title = '', $checked = '', $new = false, 
         return ($title != '' ? '<label class="control-label">' . $title . '</label>' : '') . '<p class="form-control" readonly="readonly">' . ($value ? $yes : $no) . '</p>';
 }
 
-function CheckboxInput_comments($value, $name, $title = '', $checked = '', $new = false, $yes = 'Yes', $no = 'No', $div = true, $extra = '') {
+function CheckboxInput_comments($value, $name, $title = '', $checked = '', $new = false, $yes = _yes, $no = _no, $div = true, $extra = '') {
 
     if ($checked) {
         if (strpos($name, 'STANDARD_GRADE_SCALE'))
@@ -454,7 +511,7 @@ function CheckboxInput_comments($value, $name, $title = '', $checked = '', $new 
         return ($title != '' ? '<label class="control-label">' . $title . '</label>' : '') . '<p class="form-control" readonly="readonly">' . ($value ? $yes : $no) . '</p>';
 }
 
-function CheckboxInputSwitch($value, $name, $title = '', $checked = '', $new = false, $yes = 'Yes', $no = 'No', $extra = '', $switchery_color = 'switch-default', $size = 'sm') {
+function CheckboxInputSwitch($value, $name, $title = '', $checked = '', $new = false, $yes = _yes, $no = _no, $extra = '', $switchery_color = 'switch-default', $size = 'sm') {
 
     // $checked has been deprecated -- it remains only as a placeholder
     if (Preferences('HIDDEN') != 'Y') {
@@ -496,7 +553,7 @@ function CheckboxInputSwitch($value, $name, $title = '', $checked = '', $new = f
         return '<div class="checkbox checkbox-switch ' . $switchery_color . ' switch-' . $size . '"><label><INPUT type=checkbox disabled="disabled" ' . ($value ? 'checked=checked' : '') . '><span></span>' . $title . '</label></div>';
 }
 
-function CheckboxInput_grade($value, $name, $title = '', $checked = '', $new = false, $yes = 'Yes', $no = 'No', $div = true, $extra = '') {
+function CheckboxInput_grade($value, $name, $title = '', $checked = '', $new = false, $yes = _yes, $no = _no, $div = true, $extra = '') {
 
     if ($checked) {
         if (strpos($name, 'STANDARD_GRADE_SCALE'))
@@ -526,7 +583,7 @@ function CheckboxInput_grade($value, $name, $title = '', $checked = '', $new = f
         return '<div class="form-control" disabled=disabled>' . ($value ? $yes : $no) . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '') . '</div>';
 }
 
-function CheckboxInput_exam($value, $name, $title = '', $checked = '', $new = false, $yes = 'Yes', $no = 'No', $div = true, $extra = '') {
+function CheckboxInput_exam($value, $name, $title = '', $checked = '', $new = false, $yes = _yes, $no = _no, $div = true, $extra = '') {
 
     if ($checked) {
         if (strpos($name, 'STANDARD_GRADE_SCALE'))
@@ -556,7 +613,7 @@ function CheckboxInput_exam($value, $name, $title = '', $checked = '', $new = fa
         return '<div class="form-control" disabled=disabled>' . ($value ? $yes : $no) . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '') . '</div>';
 }
 
-function CheckboxInput_var_sch($value, $name, $title = '', $checked = '', $new = false, $yes = 'Yes', $no = 'No', $div = true, $extra = '') {
+function CheckboxInput_var_sch($value, $name, $title = '', $checked = '', $new = false, $yes = _yes, $no = _no, $div = true, $extra = '') {
 
     if ($checked) {
         if (strpos($name, 'STANDARD_GRADE_SCALE'))
@@ -582,7 +639,7 @@ function CheckboxInput_var_sch($value, $name, $title = '', $checked = '', $new =
         return ($value ? $yes : $no) . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '');
 }
 
-function CheckboxInputMod($value, $name, $title = '', $checked = '', $new = false, $yes = 'Yes', $no = 'No', $div = true, $extra = '') {
+function CheckboxInputMod($value, $name, $title = '', $checked = '', $new = false, $yes = _yes, $no = _no, $div = true, $extra = '') {
 
     // $checked has been deprecated -- it remains only as a placeholder
     if (Preferences('HIDDEN') != 'Y')
@@ -605,7 +662,7 @@ function CheckboxInputMod($value, $name, $title = '', $checked = '', $new = fals
 }
 
 //for calendar date
-function CheckboxInput_Calendar($value, $name, $title = '', $checked = '', $new = false, $yes = 'Yes', $no = 'No', $div = true, $extra = '') {
+function CheckboxInput_Calendar($value, $name, $title = '', $checked = '', $new = false, $yes = _yes, $no = _no, $div = true, $extra = '') {
     // $checked has been deprecated -- it remains only as a placeholder
 
     if ($new == true) {
@@ -624,7 +681,7 @@ function CheckboxInput_Calendar($value, $name, $title = '', $checked = '', $new 
         return ($value ? $yes : $no) . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '');
 }
 
-function CheckboxInputWithID($value, $name, $id, $title = '', $checked = '', $new = false, $yes = 'Yes', $no = 'No', $div = true, $extra = '') {
+function CheckboxInputWithID($value, $name, $id, $title = '', $checked = '', $new = false, $yes = _yes, $no = _no, $div = true, $extra = '') {
     // $checked has been deprecated -- it remains only as a placeholder
     if (Preferences('HIDDEN') != 'Y')
         $div = false;
@@ -982,7 +1039,6 @@ function DateInputAY($value, $name, $counter = 1, $div_visibility = false) {
                  * Old Calendar Style
                  * init(' . $counter . ',2);
                  */
-
                 return '<div id="date_div_' . $counter . '" class="fake_datepicker" onClick="$(\'#original_date_' . $counter . '\').show(); $(\'#date_div_' . $counter . '\').hide();">' . (($title != '') ? '<label class="control-label col-md-4 text-right">' . $title . '</label><div class="col-md-8">' : '') . '<div class="input-group"><span class="input-group-addon"><i class="icon-calendar22"></i></span><input type="text" readonly="readonly" data-calid="' . $counter . '" class="form-control" value="' . ProperDateAY($value) . '" /></div>' . (($title != '') ? '</div>' : '') . '</div>'
                         //. '<div id="date_div_' . $counter . '" class="fake_datepicker" onClick="$(\'#original_date_' . $counter . '\').show(); $(\'#date_div_' . $counter . '\').hide();" style="display: inline" >' . (($title != '') ? '<label class="control-label col-md-4 text-right">' . $title . '</label><div class="col-md-8">' : '') . '<div class="input-group"><span class="input-group-addon"><i class="icon-calendar22"></i></span><input type="text" readonly="readonly" data-calid="'.$counter.'" class="form-control" value="' .$value. '" /></div>' . (($title != '') ? '</div>' : '') . '</div>'
                         . '<div class="input-group datepicker-group" id="original_date_' . $counter . '" ' . $show . '  style="display:none;">'
@@ -1141,7 +1197,7 @@ function TextAreaInputModal($value, $name, $title = '', $options = '', $div = tr
         return (($value != '') ? nl2br($value) : '-') . ($title != '' ? '<BR><small>' . (strpos(strtolower($title), '<font ') === false ? '<FONT color=' . Preferences('TITLES') . '>' : '') . $title . (strpos(strtolower($title), '<font ') === false ? '</FONT>' : '') . '</small>' : '');
 }
 
-function CheckboxInputSwitchModal($value, $name, $title = '', $checked = '', $new = false, $yes = 'Yes', $no = 'No', $extra = '', $switchery_color = 'switch-default', $size = 'sm') {
+function CheckboxInputSwitchModal($value, $name, $title = '', $checked = '', $new = false, $yes = _yes, $no = _no, $extra = '', $switchery_color = 'switch-default', $size = 'sm') {
 
     // $checked has been deprecated -- it remains only as a placeholder
     if (Preferences('HIDDEN') != 'Y') {

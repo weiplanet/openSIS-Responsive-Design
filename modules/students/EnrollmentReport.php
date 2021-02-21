@@ -27,6 +27,12 @@
 #***************************************************************************************
 include('../../RedirectModulesInc.php');
 include 'modules/grades/ConfigInc.php';
+
+if(isset($_SESSION['student_id']) && $_SESSION['student_id'] != '')
+{
+    $_REQUEST['search_modfunc'] = 'list';
+}
+
 if($_REQUEST['modfunc']=='save')
 {
  $cur_session_RET=DBGet(DBQuery('SELECT YEAR(start_date) AS PRE,YEAR(end_date) AS POST FROM school_years WHERE SCHOOL_ID=\''.UserSchool().'\' AND SYEAR=\''.UserSyear().'\''));
@@ -41,7 +47,7 @@ if($_REQUEST['modfunc']=='save')
 	if(count($_REQUEST['st_arr']))
 	{	
 	$st_list = '\''.implode('\',\'',$_REQUEST['st_arr']).'\'';
-        $RET=DBGet(DBQuery('SELECT CONCAT(s.LAST_NAME,\''.',' .'\',coalesce(s.COMMON_NAME,s.FIRST_NAME)) AS FULL_NAME,s.LAST_NAME,s.FIRST_NAME,s.MIDDLE_NAME,s.STUDENT_ID,s.PHONE,ssm.SCHOOL_ID,s.ALT_ID,ssm.SCHOOL_ID AS LIST_SCHOOL_ID,ssm.GRADE_ID,ssm.START_DATE,ssm.END_DATE,
+        $RET=DBGet(DBQuery('SELECT CONCAT(s.LAST_NAME,\''.', ' .'\',coalesce(s.COMMON_NAME,s.FIRST_NAME)) AS FULL_NAME,s.LAST_NAME,s.FIRST_NAME,s.MIDDLE_NAME,s.STUDENT_ID,s.PHONE,ssm.SCHOOL_ID,s.ALT_ID,ssm.SCHOOL_ID AS LIST_SCHOOL_ID,ssm.GRADE_ID,ssm.START_DATE,ssm.END_DATE,
                 (SELECT sec.title FROM  student_enrollment_codes sec where ssm.enrollment_code=sec.id)AS ENROLLMENT_CODE,
                 (SELECT sec.title FROM  student_enrollment_codes sec where ssm.drop_code=sec.id) AS DROP_CODE,ssm.SCHOOL_ID 
                 FROM  students s , student_enrollment ssm
@@ -49,12 +55,17 @@ if($_REQUEST['modfunc']=='save')
                 ORDER BY FULL_NAME ASC,START_DATE DESC'),array('START_DATE'=>'ProperDate','END_DATE'=>'ProperDate','SCHOOL_ID'=>'GetSchool','GRADE_ID'=>'GetGrade'),array('STUDENT_ID'));
         if(count($RET))
 	{
-            $columns = array('START_DATE'=>'Start Date','ENROLLMENT_CODE'=>'Enrollment Code','END_DATE'=>'Drop Date','DROP_CODE'=>'Drop Code','SCHOOL_ID'=>'Last School');
+			$columns = array('START_DATE'=>_startDate,
+			'ENROLLMENT_CODE'=>_enrollmentCode,
+			'END_DATE'=>_dropDate,
+			'DROP_CODE'=>_dropCode,
+			'SCHOOL_ID'=>_schoolName,
+		);
 		$handle = PDFStart();
 		foreach($RET as $student_id=>$value)
 		{
 			echo "<table width=100%  style=\" font-family:Arial; font-size:12px;\" >";
-			echo "<tr><td width=105>".DrawLogo()."</td><td  style=\"font-size:15px; font-weight:bold; padding-top:20px;\">". GetSchool(UserSchool()).' ('.$cur_session.')'."<div style=\"font-size:12px;\">Student Enroll Report</div></td><td align=right style=\"padding-top:20px\">". ProperDate(DBDate()) ."<br \>Powered by openSIS</td></tr><tr><td colspan=3 style=\"border-top:1px solid #333;\">&nbsp;</td></tr></table>";
+			echo "<tr><td width=105>".DrawLogo()."</td><td  style=\"font-size:15px; font-weight:bold; padding-top:20px;\">". GetSchool(UserSchool()).' ('.$cur_session.')'."<div style=\"font-size:12px;\">"._studentEnrollmentReport."</div></td><td align=right style=\"padding-top:20px\">". ProperDate(DBDate()) ."<br \>"._studentEnrollmentReport."</td></tr><tr><td colspan=3 style=\"border-top:1px solid #333;\">&nbsp;</td></tr></table>";
 			echo '<!-- MEDIA SIZE 8.5x11in -->';
 			
 				unset($_openSIS['DrawHeader']);
@@ -71,13 +82,13 @@ if($_REQUEST['modfunc']=='save')
                                 $enroll_RET[$i]['SCHOOL_ID'] = ($enrollment['SCHOOL_ID']?$enrollment['SCHOOL_ID']:'--');
                             }
 				echo '<table border=0>';
-				echo '<tr><td>Student Name :</td>';
+				echo '<tr><td>'._studentName.' :</td>';
 				echo '<td>'.$enrollment['FULL_NAME'].'</td></tr>';
-				echo '<tr><td>Student ID :</td>';
+				echo '<tr><td>'._studentId.' :</td>';
 				echo '<td>'.$student_id.'</td></tr>';
-                                echo '<tr><td>Alternate ID :</td>';
+                                echo '<tr><td>'._alternateId.' :</td>';
 				echo '<td>'.$enrollment['ALT_ID'].'</td></tr>';
-				echo '<tr><td>Student Grade :</td>';
+				echo '<tr><td>'._studentGrade.' :</td>';
                                 $grade=DBGet(DBQuery('SELECT GRADE_ID FROM student_enrollment WHERE SYEAR='.UserSyear().' AND SCHOOL_ID='.UserSchool().' AND STUDENT_ID='.$student_id.' AND (END_DATE>=\''.date('Y-m-d').'\' OR END_DATE IS NULL OR END_DATE=\'0000-00-00\')  '),array('GRADE_ID'=>'GetGrade'));
 				echo '<td>'.$grade[1]['GRADE_ID'].'</td></tr>';
 				echo '</table>';
@@ -91,12 +102,12 @@ if($_REQUEST['modfunc']=='save')
             }
         }
 	else
-		BackPrompt('You must choose at least one student.');
+		BackPrompt(_youMustChooseAtLeastOneStudent.'.');
 }
 
 if(!$_REQUEST['modfunc'])
 {
-	DrawBC("Student > ".ProgramTitle());
+	DrawBC(""._student." > ".ProgramTitle());
 
 	if($_REQUEST['search_modfunc']=='list')
 	{
@@ -105,8 +116,13 @@ if(!$_REQUEST['modfunc'])
 
 	$extra['link'] = array('FULL_NAME'=>false);
 	$extra['SELECT'] = ",s.STUDENT_ID AS CHECKBOX";
+	if(isset($_SESSION['student_id']) && $_SESSION['student_id'] != '')
+    {
+        $extra['WHERE'] .= ' AND s.STUDENT_ID=' . $_SESSION['student_id'];
+    }
 	$extra['functions'] = array('CHECKBOX'=>'_makeChooseCheckbox');
-	$extra['columns_before'] = array('CHECKBOX'=>'</A><INPUT type=checkbox value=Y name=controller onclick="checkAll(this.form,this.form.controller.checked,\'unused\');"><A>');
+	// $extra['columns_before'] = array('CHECKBOX'=>'</A><INPUT type=checkbox value=Y name=controller onclick="checkAll(this.form,this.form.controller.checked,\'unused\');"><A>');
+	$extra['columns_before'] = array('CHECKBOX'=>'</A><INPUT type=checkbox value=Y name=controller onclick="checkAllDtMod(this,\'st_arr\');"><A>');
 	$extra['options']['search'] = false;
 	$extra['new'] = true;
 	
@@ -115,7 +131,7 @@ if(!$_REQUEST['modfunc'])
 	if($_REQUEST['search_modfunc']=='list')
 	{
 		if($_SESSION['count_stu']!=0)
-		echo '<div class="text-right p-b-20 p-r-20"><INPUT type=submit class="btn btn-primary" value=\'Create Enrollment Report for Selected Students\'></div>';
+		echo '<div class="text-right p-b-20 p-r-20"><INPUT type=submit class="btn btn-primary" value=\''._createEnrollmentReportForSelectedStudents.'\'></div>';
 		echo "</FORM>";
 	}
 }
@@ -123,8 +139,13 @@ if(!$_REQUEST['modfunc'])
 function _makeChooseCheckbox($value,$title)
 {
 //	return '<INPUT type=checkbox name=st_arr[] value='.$value.' checked>';
-        global $THIS_RET;
-    return "<input name=unused[$THIS_RET[STUDENT_ID]] value=" . $THIS_RET[STUDENT_ID] . "  type='checkbox' id=$THIS_RET[STUDENT_ID] onClick='setHiddenCheckboxStudents(\"st_arr[]\",this,$THIS_RET[STUDENT_ID]);' />";
+    //     global $THIS_RET;
+    // return "<input name=unused[$THIS_RET[STUDENT_ID]] value=" . $THIS_RET[STUDENT_ID] . "  type='checkbox' id=$THIS_RET[STUDENT_ID] onClick='setHiddenCheckboxStudents(\"st_arr[]\",this,$THIS_RET[STUDENT_ID]);' />";
+	global $THIS_RET;
+	//	return '<INPUT type=checkbox name=st_arr[] value='.$value.' checked>';
+			
+			return "<input  class=fd name=unused_var[$THIS_RET[STUDENT_ID]] value=" . $THIS_RET[STUDENT_ID] . " type='checkbox' id=$THIS_RET[STUDENT_ID] onClick='setHiddenCheckboxStudents(\"st_arr[$THIS_RET[STUDENT_ID]]\",this,$THIS_RET[STUDENT_ID]);' />";
+		
 }
 
 function _makeTeacher($teacher,$column)

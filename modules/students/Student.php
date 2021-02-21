@@ -32,7 +32,7 @@ ini_set('memory_limit', '1200000000M');
 ini_set('max_execution_time', '500000');
 unset($flag);
 session_start();
-if ($_REQUEST['modfunc'] == 'clearall') {
+if (clean_param($_REQUEST['modfunc'], PARAM_NOTAGS) == 'clearall') {
 
     if (DeletePromptParent('Parent')) {
 
@@ -135,7 +135,7 @@ if ($_REQUEST['month_values']['student_enrollment'][$_REQUEST['student_id']]['ST
                     unset($_REQUEST['day_values']['student_enrollment'][$_REQUEST['student_id']]['START_DATE']);
                     unset($_REQUEST['year_values']['student_enrollment'][$_REQUEST['student_id']]['START_DATE']);
                     unset($_REQUEST['values']['student_enrollment'][$_REQUEST['student_id']]['CALENDAR_ID']);
-                    $err = 'Cannot change start date as student has association from ' . date('F j, Y', strtotime($gsd['START_DATE']));
+                    $err = ''._cannotChangeStartDateAsStudentHasAssociationFrom.' ' . date('F j, Y', strtotime($gsd['START_DATE']));
                     break;
                 }
             }
@@ -167,7 +167,7 @@ if($_REQUEST['values']['student_enrollment'][$_REQUEST['enrollment_id']]['DROP_C
     $drp_code=DBGet(DBQuery('SELECT * FROM student_enrollment_codes WHERE TYPE=\'TrnD\' AND SYEAR='. UserSyear()));
     if ($_REQUEST['month_values']['student_enrollment'][$_REQUEST['enrollment_id']]['END_DATE'] == '' && $_REQUEST['day_values']['student_enrollment'][$_REQUEST['enrollment_id']]['END_DATE'] == '' && $_REQUEST['year_values']['student_enrollment'][$_REQUEST['enrollment_id']]['END_DATE'] == '' && $_REQUEST['values']['student_enrollment'][$_REQUEST['enrollment_id']]['DROP_CODE'] != $drp_code[1]['ID']) {
 
-        echo "<p align='center'><b style='color:red'>Please enter proper drop date. Cannot drop student without drop date.</b></p>";
+        echo "<p align='center'><b style='color:red'>"._pleaseEnterProperDropDateCannotDropStudentWithoutDropDate."</b></p>";
         unset($_REQUEST['values']['student_enrollment'][$_REQUEST['enrollment_id']]['DROP_CODE']);
     }
 }
@@ -178,10 +178,10 @@ if ($_REQUEST['action'] == 'delete_goal' || $_REQUEST['action'] == 'delete_goal_
 
     if (!isset($_REQUEST['ans'])) {
 
-        PopTable('header', 'Delete Confirmation');
-        echo "<div class=clear></div><b>Are you sure want to delete this Goal?</b><div class=clear></div><div class=clear></div><center><a href='Modules.php?modname=students/Student.php&include=GoalInc&category_id=5&action=delete_goal_ok&gid=" . $goal_id . "&ans=yes' style='text-decoration:none; padding:6px 24px 6px 25px;' class=\"btn btn-primary\"><strong>OK</strong></a> 
+        PopTable('header',  _deleteConfirmation);
+        echo "<div class=clear></div><b>"._areYouSureWantToDeleteThisGoal."</b><div class=clear></div><div class=clear></div><center><a href='Modules.php?modname=students/Student.php&include=GoalInc&category_id=5&action=delete_goal_ok&gid=" . $goal_id . "&ans=yes' style='text-decoration:none; padding:6px 24px 6px 25px;' class=\"btn btn-primary\"><strong>"._ok."</strong></a> 
 		
-		<a href='Modules.php?modname=students/Student.php&include=GoalInc&category_id=5&action=delete_goal_can&gid=" . $goal_id . "&ans=no' style='text-decoration:none; padding:6px 15px 6px 15px;' class=\"btn btn-primary\"><strong>Cancel</strong></a></center>";
+		<a href='Modules.php?modname=students/Student.php&include=GoalInc&category_id=5&action=delete_goal_can&gid=" . $goal_id . "&ans=no' style='text-decoration:none; padding:6px 15px 6px 15px;' class=\"btn btn-primary\"><strong>"._cancel."</strong></a></center>";
 
         PopTable('footer');
     } elseif (isset($_REQUEST['ans']) && $_REQUEST['ans'] == 'yes') {
@@ -199,7 +199,7 @@ if ($_REQUEST['action'] == 'delete_goal' || $_REQUEST['action'] == 'delete_goal_
             $_REQUEST['action'] = 'delete';
             $_REQUEST['goal_id'] = $goal_id;
             $_REQUEST['action'] = 'delete_goal_can';
-            echo '<div class="alert bg-danger alert-styled-left">Unable to delete Goal. Please delete Progresses first.</div>';
+            echo '<div class="alert bg-danger alert-styled-left">'._unableToDeleteGoalPleaseDeleteProgressesFirst.'</div>';
             unset($_REQUEST['modfunc']);
         }
     } else {
@@ -218,10 +218,10 @@ if ($_REQUEST['action'] == 'delete' || $_REQUEST['action'] == 'delete_can' || $_
     if (!isset($_REQUEST['ans'])) {
         $_REQUEST['goal_id'] = $_REQUEST['gid'];
 
-        PopTable('header', 'Delete Confirmation');
-        echo "<div class=clear></div><b>Are you sure want to delete this student_goal_progress?</b><div class=clear></div><div class=clear></div><center><a href='Modules.php?modname=students/Student.php&include=GoalInc&category_id=5&action=delete_ok&gid=" . $goal_id . "&pid=" . $progress_id . "&ans=yes' style='text-decoration:none; padding:6px 24px 6px 25px;' class=\"btn btn-primary\"><strong>OK</strong></a> 
+        PopTable('header',  _deleteConfirmation);
+        echo "<div class=clear></div><b>"._areYouSureWantToDeleteThisStudentGoalProgress."</b><div class=clear></div><div class=clear></div><center><a href='Modules.php?modname=students/Student.php&include=GoalInc&category_id=5&action=delete_ok&gid=" . $goal_id . "&pid=" . $progress_id . "&ans=yes' style='text-decoration:none; padding:6px 24px 6px 25px;' class=\"btn btn-primary\"><strong>"._ok."</strong></a> 
 		
-		<a href='Modules.php?modname=students/Student.php&include=GoalInc&category_id=5&action=delete_can&gid=" . $goal_id . "&pid=" . $progress_id . "&ans=no' style='text-decoration:none; padding:6px 15px 6px 15px;' class=\"btn btn-primary\"><strong>Cancel</strong></a></center>";
+		<a href='Modules.php?modname=students/Student.php&include=GoalInc&category_id=5&action=delete_can&gid=" . $goal_id . "&pid=" . $progress_id . "&ans=no' style='text-decoration:none; padding:6px 15px 6px 15px;' class=\"btn btn-primary\"><strong>"._cancel."</strong></a></center>";
 
         PopTable('footer');
     } elseif (isset($_REQUEST['ans']) && $_REQUEST['ans'] == 'yes') {
@@ -261,7 +261,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
     if (UserStudentID() != '' && $_REQUEST['student_id'] != 'new')
         $_REQUEST['student_id'] = UserStudentID();
     ####################
-    if (isset($_REQUEST['student_id']) && $_REQUEST['student_id'] != 'new' && $title_set != 'y' && $_REQUEST['modfunc'] != 'detail' && $_REQUEST['modfunc'] != 'lookup') {
+    if (isset($_REQUEST['student_id']) && $_REQUEST['student_id'] != 'new' && $title_set != 'y' && clean_param($_REQUEST['modfunc'], PARAM_NOTAGS) != 'detail' && clean_param($_REQUEST['modfunc'], PARAM_NOTAGS) != 'lookup') {
         $RET = DBGet(DBQuery('SELECT FIRST_NAME,LAST_NAME,MIDDLE_NAME,NAME_SUFFIX,SCHOOL_ID FROM students,student_enrollment WHERE students.STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND student_enrollment.STUDENT_ID = students.STUDENT_ID '));
 
 
@@ -272,11 +272,11 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
         }
 
         if ($count_student_RET[1]['NUM'] > 1 && User('PROFILE') != 'student' && User('PROFILE') != 'parent') {
-            DrawHeaderHome('<div class="panel"><div class="panel-heading"><h6 class="panel-title">Selected Student : ' . $RET[1]['FIRST_NAME'] . '&nbsp;' . ($RET[1]['MIDDLE_NAME'] ? $RET[1]['MIDDLE_NAME'] . ' ' : '') . $RET[1]['LAST_NAME'] . '&nbsp;' . $RET[1]['NAME_SUFFIX'] . '</h6> <div class="heading-elements"><span class="heading-text"><A HREF=Modules.php?modname=' . $_REQUEST['modname'] . '&search_modfunc=list&next_modname=Students/Student.php&ajax=true&bottom_back=true&return_session=true target=body><i class="icon-square-left"></i> Back to Student List</A></span><div class="btn-group heading-btn"><A HREF=Side.php?student_id=new&modcat=' . $_REQUEST['modcat'] . ' class="btn btn-danger btn-xs">Deselect</A></div></div></div></div>');
+            DrawHeaderHome('<div class="panel"><div class="panel-heading"><h6 class="panel-title">'._selectedStudent.' : ' . $RET[1]['FIRST_NAME'] . '&nbsp;' . ($RET[1]['MIDDLE_NAME'] ? $RET[1]['MIDDLE_NAME'] . ' ' : '') . $RET[1]['LAST_NAME'] . '&nbsp;' . $RET[1]['NAME_SUFFIX'] . '</h6> <div class="heading-elements"><span class="heading-text"><A HREF=Modules.php?modname=' . $_REQUEST['modname'] . '&search_modfunc=list&next_modname=Students/Student.php&ajax=true&bottom_back=true&return_session=true target=body><i class="icon-square-left"></i> '._backToStudentList.'</A></span><div class="btn-group heading-btn"><A HREF=Side.php?student_id=new&modcat=' . $_REQUEST['modcat'] . ' class="btn btn-danger btn-xs">'._deselect.'</A></div></div></div></div>');
         } else if (User('PROFILE') == 'student') {
-            DrawHeaderHome('<div class="panel"><div class="panel-heading"><h6 class="panel-title">Student Name : ' . $RET[1]['FIRST_NAME'] . '&nbsp;' . ($RET[1]['MIDDLE_NAME'] ? $RET[1]['MIDDLE_NAME'] . ' ' : '') . $RET[1]['LAST_NAME'] . '&nbsp;' . $RET[1]['NAME_SUFFIX'] . '</h6></div></div>');
+            DrawHeaderHome('<div class="panel"><div class="panel-heading"><h6 class="panel-title">'._studentName.' : ' . $RET[1]['FIRST_NAME'] . '&nbsp;' . ($RET[1]['MIDDLE_NAME'] ? $RET[1]['MIDDLE_NAME'] . ' ' : '') . $RET[1]['LAST_NAME'] . '&nbsp;' . $RET[1]['NAME_SUFFIX'] . '</h6></div></div>');
         } else if ($count_student_RET[1]['NUM'] == 1) {
-            DrawHeaderHome('<div class="panel"><div class="panel-heading"><h6 class="panel-title">Selected Student : ' . $RET[1]['FIRST_NAME'] . '&nbsp;' . ($RET[1]['MIDDLE_NAME'] ? $RET[1]['MIDDLE_NAME'] . ' ' : '') . $RET[1]['LAST_NAME'] . '&nbsp;' . $RET[1]['NAME_SUFFIX'] . '</h6> <div class="heading-elements"><A HREF=SideForStudent.php?student_id=new&modcat=' . $_REQUEST['modcat'] . '&modname=' . $_REQUEST['modname'] . '  class="btn btn-danger btn-xs">Deselect</A></div></div></div>');
+            DrawHeaderHome('<div class="panel"><div class="panel-heading"><h6 class="panel-title">'._selectedStudent.' : ' . $RET[1]['FIRST_NAME'] . '&nbsp;' . ($RET[1]['MIDDLE_NAME'] ? $RET[1]['MIDDLE_NAME'] . ' ' : '') . $RET[1]['LAST_NAME'] . '&nbsp;' . $RET[1]['NAME_SUFFIX'] . '</h6> <div class="heading-elements"><A HREF=SideForStudent.php?student_id=new&modcat=' . $_REQUEST['modcat'] . '&modname=' . $_REQUEST['modname'] . '  class="btn btn-danger btn-xs">'._deselect.'</A></div></div></div>');
         }
     }
     if ($title_set == 'y')
@@ -297,9 +297,9 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
     }
 //////////////////////////////////////////////////////////////////////////////////
     if ($_REQUEST['err_msg'] == true)
-        echo "<center><font color=red><b>Birthdate is invalid, data could not be saved.</b><font></center>";
+        echo "<center><font color=red><b>"._birthdateIsInvalidDataCouldNotBeSaved."</b><font></center>";
 
-    if ($_REQUEST['modfunc'] == 'update' && $_REQUEST['student_id'] && $_REQUEST['student_id'] != 'new' && $_POST['button'] == 'Save') {
+    if (clean_param($_REQUEST['modfunc'], PARAM_NOTAGS) == 'update' && $_REQUEST['student_id'] && $_REQUEST['student_id'] != 'new' && $_POST['button'] == 'Save') {
 //        if ($_POST['button'] == 'Save') { #&& AllowEdit()
         $transfer_flag = 0;
 
@@ -323,13 +323,16 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                 $start_date_new = $_REQUEST['TRANSFER']['STUDENT_ENROLLMENT_START'];
                     if($start_date_new == $end_date_old)
                     {
-                    $_SESSION['ERR_TRANS'] = "<div class=\"alert bg-warning alert-styled-left\">End Date and Start Date Cannot Be Same</div>";
+                    $_SESSION['ERR_TRANS'] = "<div class=\"alert bg-warning alert-styled-left\">"._endDateAndStartDateCannotBeSame."</div>";
                     }
                     else
                     {
                     unset($_SESSION['ERR_TRANS']);
                     if ($check_asociation[1]['REC_EX'] != 0) {
-                        DBQuery('UPDATE student_enrollment SET DROP_CODE=\'' . $drop_code . '\',END_DATE=\'' . $_REQUEST['TRANSFER']['STUDENT_ENROLLMENT_END_DATE'] . '\' WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SCHOOL_ID=\'' . UserSchool() . '\'  AND SYEAR=\'' . UserSyear() . '\'');  //pinki    
+
+                        $se_id = DBGet(DBQuery('SELECT MAX(id) AS ID FROM student_enrollment WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SCHOOL_ID=\'' . UserSchool() . '\'  AND SYEAR=\'' . UserSyear() . '\''));
+                        DBQuery('UPDATE student_enrollment SET DROP_CODE=\'' . $drop_code . '\',END_DATE=\'' . $_REQUEST['TRANSFER']['STUDENT_ENROLLMENT_END_DATE'] . '\' WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SCHOOL_ID=\'' . UserSchool() . '\'  AND SYEAR=\'' . UserSyear() . '\' AND ID=\''.$se_id[1]['ID'].'\'');  //pinki  
+                          
                         $syear_RET = DBGet(DBQuery("SELECT MAX(SYEAR) AS SYEAR,TITLE FROM school_years WHERE SCHOOL_ID=" . $_REQUEST['TRANSFER']['SCHOOL']));
                         $syear = $syear_RET[1]['SYEAR'];
                         $enroll_code = DBGet(DBQuery('SELECT id FROM student_enrollment_codes WHERE syear=\'' . $syear . '\' AND type=\'TrnE\''));  //pinki
@@ -349,10 +352,15 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                         }
                         if ($gread_exists[1]['PRESENT'] == 1 && $gread_exists[1]['ID']) {
                             DBQuery("INSERT INTO student_enrollment (SYEAR ,SCHOOL_ID ,STUDENT_ID ,GRADE_ID ,START_DATE ,END_DATE ,ENROLLMENT_CODE ,DROP_CODE ,NEXT_SCHOOL ,CALENDAR_ID ,LAST_SCHOOL) VALUES (" . $syear . "," . $_REQUEST['TRANSFER']['SCHOOL'] . "," . $_REQUEST['student_id'] . "," . $_REQUEST['TRANSFER']['Grade_Level'] . ",'" . $_REQUEST['TRANSFER']['STUDENT_ENROLLMENT_START'] . "',''," . $enroll_code[1]['ID'] . ",'','" . $_REQUEST['TRANSFER']['SCHOOL'] . "',$calender_id,$last_school)");
-                            DBQuery('UPDATE student_enrollment SET DROP_CODE=\'' . $drop_code . '\',END_DATE=\'' . $_REQUEST['TRANSFER']['STUDENT_ENROLLMENT_END_DATE'] . '\' WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SCHOOL_ID=\'' . UserSchool() . '\'  AND SYEAR=\'' . UserSyear() . '\'');  //pinki    
+
+                            $se_id = DBGet(DBQuery('SELECT MAX(id) AS ID FROM student_enrollment WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SCHOOL_ID=\'' . UserSchool() . '\'  AND SYEAR=\'' . UserSyear() . '\''));
+                            DBQuery('UPDATE student_enrollment SET DROP_CODE=\'' . $drop_code . '\',END_DATE=\'' . $_REQUEST['TRANSFER']['STUDENT_ENROLLMENT_END_DATE'] . '\' WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SCHOOL_ID=\'' . UserSchool() . '\'  AND SYEAR=\'' . UserSyear() . '\' AND ID=\''.$se_id[1]['ID'].'\'');  //pinki    
+                        
                         } else {
                             DBQuery("INSERT INTO student_enrollment (SYEAR ,SCHOOL_ID ,STUDENT_ID ,GRADE_ID ,START_DATE ,END_DATE ,ENROLLMENT_CODE ,DROP_CODE ,NEXT_SCHOOL ,CALENDAR_ID ,LAST_SCHOOL) VALUES (" . $syear . "," . $_REQUEST['TRANSFER']['SCHOOL'] . "," . $_REQUEST['student_id'] . "," . $_REQUEST['TRANSFER']['Grade_Level'] . ",'" . $_REQUEST['TRANSFER']['STUDENT_ENROLLMENT_START'] . "',''," . $enroll_code[1]['ID'] . ",'','" . $_REQUEST['TRANSFER']['SCHOOL'] . "',$calender_id,$last_school)");
-                            DBQuery('UPDATE student_enrollment SET DROP_CODE=\'' . $drop_code . '\',END_DATE=\'' . $_REQUEST['TRANSFER']['STUDENT_ENROLLMENT_END_DATE'] . '\' WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SCHOOL_ID=\'' . UserSchool() . '\'  AND SYEAR=\'' . UserSyear() . '\'');  //pinki    
+                            
+                            $se_id = DBGet(DBQuery('SELECT MAX(id) AS ID FROM student_enrollment WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SCHOOL_ID=\'' . UserSchool() . '\'  AND SYEAR=\'' . UserSyear() . '\''));
+                            DBQuery('UPDATE student_enrollment SET DROP_CODE=\'' . $drop_code . '\',END_DATE=\'' . $_REQUEST['TRANSFER']['STUDENT_ENROLLMENT_END_DATE'] . '\' WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SCHOOL_ID=\'' . UserSchool() . '\'  AND SYEAR=\'' . UserSyear() . '\' AND ID=\''.$se_id[1]['ID'].'\'');  //pinki    
                             
                         }
                         $trans_school = $syear_RET[1]['TITLE'];
@@ -379,9 +387,9 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
         } else {
 
             if ($_REQUEST['TRANSFER']['SCHOOL'] == '' && $_REQUEST['TRANSFER']['Grade_Level'] != '')
-                echo '<SCRIPT language=javascript>alert("Please select School");window.close();</script>';
+                echo '<SCRIPT language=javascript>alert("'._pleaseSelectSchool.'");window.close();</script>';
             if ($_REQUEST['TRANSFER']['SCHOOL'] != '' && $_REQUEST['TRANSFER']['Grade_Level'] == '')
-                echo '<SCRIPT language=javascript>alert("Please select Grade Level");window.close();</script>';
+                echo '<SCRIPT language=javascript>alert("'._pleaseSelectGradeLevel.'");window.close();</script>';
             if ($_REQUEST['TRANSFER']['SCHOOL'] == '' && $_REQUEST['TRANSFER']['Grade_Level'] == '')
                 unset($_REQUEST['modfunc']);
               
@@ -442,13 +450,18 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                     }
                 }
 
-                $singular = 'User';
-                $plural = 'Users';
+                $singular = _user;
+                $plural = _users;
                 $options['save'] = false;
                 $options['print'] = false;
                 $options['search'] = false;
 
-                $columns = array('BUTTON' => 'Select any one', 'FULLNAME' => 'Name', 'USERNAME' => 'Username', 'EMAIL' => 'Email', 'STUFULLNAME' => 'Associated Student\'s Name');
+                $columns = array('BUTTON' =>_selectAnyOne,
+                 'FULLNAME' =>_name,
+                 'USERNAME' =>_username,
+                 'EMAIL' =>_email,
+                 'STUFULLNAME' =>_associatedStudentSName,
+                );
                 if ($_REQUEST['add_id'] == 'new')
                     echo '<FORM name=sel_staff id=sel_staff action="ForWindow.php?modname=' . $_REQUEST[modname] . '&modfunc=lookup&type=' . $_REQUEST['type'] . '&func=search&nfunc=status&ajax=' . $_REQUEST['ajax'] . '&add_id=new&address_id=' . $_REQUEST['address_id'] . '" METHOD=POST>';
                 else
@@ -458,8 +471,8 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                 echo '<br>';
                 echo '<center>';
                 if (count($searched_staffs) > 0)
-                    echo '<INPUT type=submit name=button value=Select class="btn btn-primary" onclick="return sel_staff_val();">&nbsp;&nbsp;';
-                echo '<INPUT type=submit name=button value=Cancel class="btn btn-default">';
+                    echo '<INPUT type=submit name=button value='._select.' class="btn btn-primary" onclick="return sel_staff_val();">&nbsp;&nbsp;';
+                echo '<INPUT type=submit name=button value="'._cancel.'" class="btn btn-default">';
                 //echo '</center>';
                 echo '</form>';
             } else
@@ -469,23 +482,23 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
             //echo '<BR>';
             PopTableforWindow('header', '');
 
-            echo '<h3 class="text-center">Search for an existing portal user (parent/guardian) <br/> to associate with this student.</h3>';
-            echo '<h5 class="text-danger text-center">Fill out one or more fields to look up an individual.</h5>';
+            echo '<h3 class="text-center">'._searchForAnExistingPortalUserParentGuardian.' <br/> '._toAssociateWithThisStudent.'</h3>';
+            echo '<h5 class="text-danger text-center">'._fillOutOneOrMoreFieldsToLookUpAnIndividual.'</h5>';
             if ($_REQUEST['add_id'] == 'new')
                 echo "<FORM class=\"form-horizontal\" name=popform id=popform action=ForWindow.php?modname=$_REQUEST[modname]&modfunc=lookup&type=" . $_REQUEST['type'] . "&func=search&ajax=" . $_REQUEST['ajax'] . "&add_id=new&address_id=" . $_REQUEST['address_id'] . " METHOD=POST>";
             else
                 echo "<FORM class=\"form-horizontal\" name=popform id=popform action=ForWindow.php?modname=$_REQUEST[modname]&modfunc=lookup&type=" . $_REQUEST['type'] . "&func=search&ajax=" . $_REQUEST['ajax'] . "&add_id=" . $_REQUEST['add_id'] . "&address_id=" . $_REQUEST['address_id'] . " METHOD=POST>";
             //echo '<div class=>';
-            echo '<div class="form-group"><label class="control-label col-xs-4">First Name</label><div class="col-xs-8">' . TextInput('', 'USERINFO_FIRST_NAME', '', 'class=form-control', true) . '</div></div>';
-            echo '<div class="form-group"><label class="control-label col-xs-4">Last Name</label><div class="col-xs-8">' . TextInput('', 'USERINFO_LAST_NAME', '', 'class=form-control', true) . '</div></div>';
-            echo '<div class="form-group"><label class="control-label col-xs-4">Email</label><div class="col-xs-8">' . TextInput('', 'USERINFO_EMAIL', '', 'class=form-control', true) . '</div></div>';
-            echo '<div class="form-group"><label class="control-label col-xs-4">Mobile Phone</label><div class="col-xs-8">' . TextInput('', 'USERINFO_MOBILE', '', 'class=form-control', true) . '</div></div>';
-            echo '<div class="form-group"><label class="control-label col-xs-4">Street Address</label><div class="col-xs-8">' . TextInput('', 'USERINFO_SADD', '', 'class=form-control', true) . '</div></div>';
-            echo '<div class="form-group"><label class="control-label col-xs-4">City</label><div class="col-xs-8">' . TextInput('', 'USERINFO_CITY', '', 'class=form-control', true) . '</div></div>';
-            echo '<div class="form-group"><label class="control-label col-xs-4">State</label><div class="col-xs-8">' . TextInput('', 'USERINFO_STATE', '', 'class=form-control', true) . '</div></div>';
-            echo '<div class="form-group"><label class="control-label col-xs-4">Zip</label><div class="col-xs-8">' . TextInput('', 'USERINFO_ZIP', '', 'class=form-control', true) . '</div></div>';
+            echo '<div class="form-group"><label class="control-label col-xs-4">'._firstName.'</label><div class="col-xs-8">' . TextInput('', 'USERINFO_FIRST_NAME', '', 'class=form-control', true) . '</div></div>';
+            echo '<div class="form-group"><label class="control-label col-xs-4">'._lastName.'</label><div class="col-xs-8">' . TextInput('', 'USERINFO_LAST_NAME', '', 'class=form-control', true) . '</div></div>';
+            echo '<div class="form-group"><label class="control-label col-xs-4">'._email.'</label><div class="col-xs-8">' . TextInput('', 'USERINFO_EMAIL', '', 'class=form-control', true) . '</div></div>';
+            echo '<div class="form-group"><label class="control-label col-xs-4">'._mobilePhone.'</label><div class="col-xs-8">' . TextInput('', 'USERINFO_MOBILE', '', 'class=form-control', true) . '</div></div>';
+            echo '<div class="form-group"><label class="control-label col-xs-4">'._streetAddress.'</label><div class="col-xs-8">' . TextInput('', 'USERINFO_SADD', '', 'class=form-control', true) . '</div></div>';
+            echo '<div class="form-group"><label class="control-label col-xs-4">'._city.'</label><div class="col-xs-8">' . TextInput('', 'USERINFO_CITY', '', 'class=form-control', true) . '</div></div>';
+            echo '<div class="form-group"><label class="control-label col-xs-4">'._state.'</label><div class="col-xs-8">' . TextInput('', 'USERINFO_STATE', '', 'class=form-control', true) . '</div></div>';
+            echo '<div class="form-group"><label class="control-label col-xs-4">'._zip.'</label><div class="col-xs-8">' . TextInput('', 'USERINFO_ZIP', '', 'class=form-control', true) . '</div></div>';
 
-            echo '<div class="text-center"><INPUT type=submit class="btn btn-primary" name=button value=Find onclick="formload_ajax(\'popform\');">&nbsp; &nbsp;<INPUT type=submit class="btn btn-default" name=button value=Cancel></div>';
+            echo '<div class="text-center"><INPUT type=submit class="btn btn-primary" name=button value='._find.' onclick="formload_ajax(\'popform\');">&nbsp; &nbsp;<INPUT type=submit class="btn btn-default" name=button value="'._cancel.'"></div>';
 
             echo '</FORM>';
             PopTableWindow('footer');
@@ -557,7 +570,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                 $_openSIS['allow_edit'] = true;
         }
 
-        if ($_REQUEST['modfunc'] == 'update' && AllowEdit()) {
+        if (clean_param($_REQUEST['modfunc'], PARAM_NOTAGS) == 'update' && AllowEdit()) {
             if (count($_REQUEST['month_students'])) {
                 foreach ($_REQUEST['month_students'] as $column => $value) {
                     $_REQUEST['students'][$column] = $_REQUEST['day_students'][$column] . '-' . $_REQUEST['month_students'][$column] . '-' . $_REQUEST['year_students'][$column];
@@ -604,7 +617,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                 if ($qry_exec[1]['COUNT'] > 0 && ($_REQUEST['category_id'] == 1 || $_REQUEST['category_id'] == 6)) {
                     $flag = true;
 
-                    $n = DuplicateStudent("duplicate records", "update");
+                    $n = DuplicateStudent(_duplicateRecords, _update);
                     if ($n == 1) {
                         unset($_REQUEST['delete_ok']);
                         $_REQUEST['ajax'] = 1;
@@ -619,6 +632,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
             }
             if ($n == 1) {
                 $flag = false;
+                 
                 if ((count($_REQUEST['students']) || count($_REQUEST['values']) || count($_REQUEST['month_values'])) && AllowEdit()) {
 
                     //print_r($content1);
@@ -633,6 +647,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                             $sql = "UPDATE students SET ";
                             $log_sql = 'UPDATE login_authentication SET ';
                             foreach ($_REQUEST['students'] as $column_name => $value) {
+                               
                                 if (substr($column_name, 0, 6) == 'CUSTOM') {
 
                                     $custom_id = str_replace("CUSTOM_", "", $column_name);
@@ -644,11 +659,11 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                         $value = $custom['DEFAULT'];
                                     } else if ($custom['NULL'] == 'NO' && $value == '') {
                                         $custom_TITLE = $custom_RET[1]['TITLE'];
-                                        echo "<font color=red><b>Unable to save data, because " . $custom_TITLE . ' is required.</b></font><br/>';
+                                        echo "<font color=red><b>"._unableToSaveDataBecause." " . $custom_TITLE . ' '._isRequired.'</b></font><br/>';
                                         $error = true;
                                     } else if ($custom_RET[1]['TYPE'] == 'numeric' && (!is_numeric($value) && $value != '')) {
                                         $custom_TITLE = $custom_RET[1]['TITLE'];
-                                        echo "<font color=red><b>Unable to save data, because " . $custom_TITLE . ' is Numeric type.</b></font><br/>';
+                                        echo "<font color=red><b>"._unableToSaveDataBecause." " . $custom_TITLE . ' '._isNumericType.'</b></font><br/>';
                                         $error = true;
                                     } else {
                                         $m_custom_RET = DBGet(DBQuery("select ID,TITLE,TYPE from custom_fields WHERE ID='" . $custom_id . "' AND TYPE='multiple'"));
@@ -668,7 +683,22 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                 }  ###Custom Ends#####
 
                                 if ($column_name != 'FIRST_NAME' && $column_name != 'MIDDLE_NAME' && $column_name != 'LAST_NAME') {
+                                    if($column_name=='ALT_ID' && $value!='')
+                                   {
+                                        
+                                        $alt_check=DBGet(DBQuery("SELECT * FROM students WHERE ALT_ID='".$value."' AND STUDENT_ID!=".$_REQUEST['student_id']));
+                                        if(count($alt_check)==0){
+                                            $value = paramlib_validation($column_name, trim($value));
+                                        }
+                                        else
+                                        {
+                                            echo "<font color=red><b>"._unableToSaveDataBecauseDuplicateAlternateIdFound."</b></font><br/>";
+                                            $error = true;
+                                        }
+                                   }
+                                   else
                                     $value = paramlib_validation($column_name, trim($value));
+                                  
                                 }
 
                                 if ($column_name == 'BIRTHDATE' || $column_name == 'ESTIMATED_GRAD_DATE') {
@@ -758,7 +788,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                     }
 
                                     if ($_FILES["file"]["error"] > 0) {
-                                        echo "<font style='color:red'><b>Unsupported File Format, Cannot Upload File</b></font><br>";
+                                        echo "<font style='color:red'><b>"._unsupportedFileFormatCannotUploadFile."</b></font><br>";
                                     } else {
 //	  move_uploaded_file($_FILES["file"]["tmp_name"], $upload->target_path);
 //	  @fopen($upload->target_path,'r');
@@ -955,17 +985,17 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                                 $sql .= "$column_name='" . str_replace("\'", "''", date('Y-m-d', strtotime($value))) . "',";
                                                 $error = false;
                                             } else
-                                                $msg = 'Student start date cannot be before students last schools drop date';
+                                                $msg = _studentStartDateCannotBeBeforeStudentsLastSchoolsDropDate;
                                         }
                                         else {
-                                            $msg = 'Student drop date cannot be before student enrollment date';
+                                            $msg = _studentDropDateCannotBeBeforeStudentEnrollmentDate;
                                         }
                                     } elseif ($value != '') {
                                         if ($value >= $get_ls_drop_date) {
                                             $sql .= "$column_name='" . str_replace("\'", "''", date('Y-m-d', strtotime($value))) . "',";
                                             $error = false;
                                         } else
-                                            $msg = 'Student start date cannot be before students last schools drop date';
+                                            $msg = _studentStartDateCannotBeBeforeStudentsLastSchoolsDropDate;
                                     }
                                 }
                                 elseif ($column_name == 'GRADE_ID') {
@@ -973,7 +1003,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                         $sql .= "$column_name='" . str_replace("\'", "''", str_replace('&#39;', "''", $value)) . "',";
                                         $error = false;
                                     } else {
-                                        $msg = 'Grade cannot be blank';
+                                        $msg = _gradeCannotBeBlank;
                                         $error = true;
                                     }
                                 } else {
@@ -996,13 +1026,13 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                 }
                                 else
                                 {
-                                        $msg = 'Please provide all details to transfer in new school.';
+                                        $msg = _pleaseProvideAllDetailsToTransferInNewSchool;
                                         $error = true;
                                     }
                                 }
 //                                $error = false;
 //                            else {
-//                              $msg = 'Please select transfer school.';
+//                              $msg = _pleaseSelectTransferSchool;
 //                                        $error = true;  
 
                             }
@@ -1032,7 +1062,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                         if ($_REQUEST['assign_student_id']) {
                             $student_id = $_REQUEST['assign_student_id'];
                             if (count(DBGet(DBQuery("SELECT STUDENT_ID FROM students WHERE STUDENT_ID='$student_id'"))))
-                                BackPrompt('That Student ID is already taken. Please select a different one.');
+                                BackPrompt(_thatStudentIdIsAlreadyTakenPleaseSelectADifferentOne);
                         }
                         else {
                             do {
@@ -1048,6 +1078,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                         $log_fields = 'PROFILE_ID,USER_ID,';
                         $log_values = '3,' . $student_id . ',';
                         foreach ($_REQUEST['students'] as $column => $value) {
+                            
                             if (substr($column, 0, 6) == 'CUSTOM') {
                                 $custom_id = str_replace("CUSTOM_", "", $column);
                                 $custom_RET = DBGet(DBQuery("SELECT TITLE,TYPE FROM custom_fields WHERE ID=" . $custom_id));
@@ -1057,12 +1088,12 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                 if ($custom['NULL'] == 'NO' && $value == '' && !$custom['DEFAULT']) {
                                     $custom_TITLE = $custom_RET[1]['TITLE'];
                                     $required_faild_error = true;
-                                    echo "<font color=red><b>Unable to save data, because " . $custom_TITLE . ' is required.</b></font><br/>';
+                                    echo "<font color=red><b>"._unableToSaveDataBecause." " . $custom_TITLE . ' '._isRequired.'</b></font><br/>';
                                     $error = true;
                                 } elseif ($custom_RET[1]['TYPE'] == 'numeric' && (!is_numeric($value) && $value != '')) {
                                     $type_faild_error = true;
                                     $custom_TITLE = $custom_RET[1]['TITLE'];
-                                    echo "<font color=red><b>Unable to save data, because " . $custom_TITLE . ' is Numeric type.</b></font><br/>';
+                                    echo "<font color=red><b>"._unableToSaveDataBecause." " . $custom_TITLE . ' '._isNumericType.'</b></font><br/>';
                                     $error = true;
                                 } else {
                                     $m_custom_RET = DBGet(DBQuery("select ID,TITLE,TYPE from custom_fields WHERE ID='" . $custom_id . "' AND TYPE='multiple'"));
@@ -1081,7 +1112,21 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                             }
                             if ($value) {
                                 if ($column != 'FIRST_NAME' && $column != 'MIDDLE_NAME' && $column != 'LAST_NAME') {
+                                    if($column=='ALT_ID' && $value!='')
+                                   {
+                                        $alt_check=DBGet(DBQuery("SELECT * FROM students WHERE ALT_ID='".$value."'"));
+                                        if(count($alt_check)==0){
+                                            $value = paramlib_validation($column, trim($value));
+                                        }
+                                        else
+                                        {
+                                            echo "<font color=red><b>"._unableToSaveDataBecauseDuplicateAlternateIdFound."</b></font><br/>";
+                                            $error = true;
+                                        }
+                                   }
+                                   else
                                     $value = paramlib_validation($column, trim($value));
+                                    
                                 }
 
                                 if ($column == 'BIRTHDATE' || $column == 'ESTIMATED_GRAD_DATE') {
@@ -1191,7 +1236,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                     }
 
                                     if ($_FILES["file"]["error"] > 0) {
-                                        echo "cannot upload file";
+                                        echo _cannotUploadFile;
                                     } else {
 //	  move_uploaded_file($_FILES["file"]["tmp_name"], $upload->target_path);
 //	  @fopen($upload->target_path,'r');
@@ -1223,7 +1268,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                         } elseif ($error == true) {
                             $error_new_student = true;
 
-                            echo '<p style=color:red>Invalid Student Name</p>';
+                            echo '<p style=color:red>'._invalidStudentName.'</p>';
                         }
                         $id = DBGet(DBQuery("SHOW TABLE STATUS LIKE 'student_enrollment'"));
                         $studentemrollment_id[1]['STUDENTENROLL_ID'] = $id[1]['AUTO_INCREMENT'];
@@ -1239,6 +1284,23 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                         else
                             $_REQUEST['values']['student_enrollment']['new']['START_DATE'] = '';
 
+
+                        ##### Student Enrollment modifications - starts #####
+                        if(isset($_REQUEST['values']['student_enrollment']['new']['START_DATE']) && $_REQUEST['values']['student_enrollment']['new']['START_DATE'] == '')
+                        {
+                            $this_school_dates = DBGet(DBQuery("SELECT `start_date` FROM `school_years` WHERE `syear` = '".UserSyear()."' AND `school_id` = '".UserSchool()."'"));
+
+                            if($this_school_dates[1]['START_DATE'] > date('Y-m-d'))
+                            {
+                                $_REQUEST['values']['student_enrollment']['new']['START_DATE'] = date('d-m-Y', strtotime($this_school_dates[1]['START_DATE']));
+                            }
+                            else
+                            {
+                                $_REQUEST['values']['student_enrollment']['new']['START_DATE'] = date('d-m-Y');
+                            }
+                        }
+                        ##### Student Enrollment modifications - ends #####
+
                         foreach ($_REQUEST['values']['student_enrollment']['new'] as $column => $value) {
                             if ($value) {
                                 $value = paramlib_validation($column, $value);
@@ -1247,7 +1309,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                     if (VerifyDate($value))
                                         $values .= "'" . date('Y-m-d', strtotime($value)) . "',";
                                     else {
-                                        $err = "Invalid Enrollment date could not be saved";
+                                        $err = _invalidEnrollmentDateCouldNotBeSaved;
                                         continue;
                                     }
                                 } else
@@ -1255,7 +1317,9 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                 $fields .= $column . ',';
                             }
                         }
+                        
                         $sql .= '(' . substr($fields, 0, -1) . ') values(' . substr($values, 0, -1) . ')';
+                        
                         if (!$error) {
                             if ($un_chl_res != 'exist' && $pass_chl_res != 'exist' && $day_valid != false) {
 
@@ -1279,11 +1343,11 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                                 $_REQUEST['student_id'] = "new";
                                 unset($value);
                                 if ($un_chl_res == 'exist' && $pass_chl_res != 'exist')
-                                    echo "<font color=red><b>User name already exist. Please try with a different user name.</b></font>";
+                                    echo "<font color=red><b>"._userNameAlreadyExistPleaseTryWithADifferentUserName."</b></font>";
                                 if ($un_chl_res != 'exist' && $pass_chl_res == 'exist')
-                                    echo "<font color=red><b>Password already exist. Please try with a different password.</b></font>";
+                                    echo "<font color=red><b>"._passwordAlreadyExistPleaseTryWithADifferentPassword."</b></font>";
                                 if ($un_chl_res == 'exist' && $pass_chl_res == 'exist')
-                                    echo "<font color=red><b>Username and password  already exist. Please try with a different user name and password.</b></font>";
+                                    echo "<font color=red><b>"._usernameAndPasswordAlreadyExistPleaseTryWithADifferentUserNameAndPassword."</b></font>";
                             }
                         }
                         $new_student = true;
@@ -1313,9 +1377,9 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
             if ($err)
                 echo '<center><font color=red><b>' . $err . '</b></font></center>';
             if ($_REQUEST['student_id'] == 'new')
-                DrawBC('Students > Add a Student');
+                DrawBC(''._students.' > '._addAStudent.'');
             else
-                DrawBC("Students > " . ProgramTitle());
+                DrawBC(""._students." > " . ProgramTitle());
 
             Search('student_id_from_student');
 
@@ -1658,19 +1722,19 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
 
                         echo '<div class="row">';
                         echo '<div class="col-md-12 text-right">';
-                        echo "<p>Showing " . (count($_SESSION['students_order']) > 1 ? $_SESSION['count'] : '1') . " of " . (count($_SESSION['students_order']) > 1 ? $_SESSION['total_stu'] : '1') . " &nbsp; ";
+                        echo "<p>"._showing." " . (count($_SESSION['students_order']) > 1 ? $_SESSION['count'] : '1') . " "._showing." " . (count($_SESSION['students_order']) > 1 ? $_SESSION['total_stu'] : '1') . " &nbsp; ";
 
                         if (count($_SESSION['students_order']) > 1) {
                             if (UserStudentID() != $_SESSION['students_order'][1]) {
-                                echo "<span class='pg-prev' style='margin-right:10px; font-size:14px; font-weight:normal;'><A HREF=Modules.php?modname=students/Student.php&v=1&student_id=" . UserStudentID() . " ><i class=\"icon-first\"></i> First</A></span>";
+                                echo "<span class='pg-prev' style='margin-right:10px; font-size:14px; font-weight:normal;'><A HREF=Modules.php?modname=students/Student.php&v=1&student_id=" . UserStudentID() . " ><i class=\"icon-first\"></i> "._first."</A></span>";
 
-                                echo "<span class='pg-prev' style='margin-right:10px; font-size:14px; font-weight:normal;'><A HREF=Modules.php?modname=students/Student.php&v=2&student_id=" . UserStudentID() . " > <i class=\"icon-backward2\"></i> Previous</A></span>";
+                                echo "<span class='pg-prev' style='margin-right:10px; font-size:14px; font-weight:normal;'><A HREF=Modules.php?modname=students/Student.php&v=2&student_id=" . UserStudentID() . " > <i class=\"icon-backward2\"></i> "._previous."</A></span>";
                             }
                             if (UserStudentID() != $last_stu) {
 
-                                echo "<span class='pg-nxt' style='margin-left:10px; font-size:14px; font-weight:normal;'><A HREF=Modules.php?modname=students/Student.php&v=3&student_id=" . UserStudentID() . " >Next <i class=\"icon-forward3\"></i></A></span>";
+                                echo "<span class='pg-nxt' style='margin-left:10px; font-size:14px; font-weight:normal;'><A HREF=Modules.php?modname=students/Student.php&v=3&student_id=" . UserStudentID() . " >"._next." <i class=\"icon-forward3\"></i></A></span>";
 
-                                echo "<span class='pg-nxt' style='margin-left:10px; font-size:14px; font-weight:normal;'><A HREF=Modules.php?modname=students/Student.php&v=4&student_id=" . UserStudentID() . " >Last <i class=\"icon-last\"></i></A></span>";
+                                echo "<span class='pg-nxt' style='margin-left:10px; font-size:14px; font-weight:normal;'><A HREF=Modules.php?modname=students/Student.php&v=4&student_id=" . UserStudentID() . " >"._last." <i class=\"icon-last\"></i></A></span>";
                             }
                         }
                         echo "</div>";
@@ -1678,11 +1742,11 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                     }
                 }
 
-                if ($_REQUEST['modfunc'] != 'delete' || $_REQUEST['delete_ok'] == '1') {
+                if (clean_param($_REQUEST['modfunc'], PARAM_NOTAGS) != 'delete' || $_REQUEST['delete_ok'] == '1') {
 
                     if ($_REQUEST['student_id'] != 'new') {
 
-                        $sql = "SELECT s.STUDENT_ID,s.FIRST_NAME,s.LAST_NAME,s.MIDDLE_NAME,s.NAME_SUFFIX,la.USERNAME,la.PASSWORD,la.LAST_LOGIN,s.IS_DISABLE,s.ESTIMATED_GRAD_DATE,s.GENDER,s.ETHNICITY,s.COMMON_NAME,s.BIRTHDATE,s.LANGUAGE,s.ALT_ID,s.EMAIL,s.PHONE,(SELECT SCHOOL_ID FROM student_enrollment WHERE SYEAR='" . UserSyear() . "' AND STUDENT_ID=s.STUDENT_ID ORDER BY START_DATE DESC,END_DATE DESC LIMIT 1) AS SCHOOL_ID,
+                        $sql = "SELECT s.STUDENT_ID,s.FIRST_NAME,s.LAST_NAME,s.MIDDLE_NAME,s.NAME_SUFFIX,la.USERNAME,la.PASSWORD,la.LAST_LOGIN,s.IS_DISABLE,s.ESTIMATED_GRAD_DATE,s.GENDER,s.ETHNICITY_ID,s.COMMON_NAME,s.BIRTHDATE,s.LANGUAGE_ID,s.ALT_ID,s.EMAIL,s.PHONE,(SELECT SCHOOL_ID FROM student_enrollment WHERE SYEAR='" . UserSyear() . "' AND STUDENT_ID=s.STUDENT_ID ORDER BY START_DATE DESC,END_DATE DESC LIMIT 1) AS SCHOOL_ID,
                         (SELECT GRADE_ID FROM student_enrollment WHERE SYEAR='" . UserSyear() . "' AND STUDENT_ID=s.STUDENT_ID ORDER BY START_DATE DESC,END_DATE DESC LIMIT 1) AS GRADE_ID,
                         (SELECT SECTION_ID FROM student_enrollment WHERE SYEAR='" . UserSyear() . "' AND STUDENT_ID=s.STUDENT_ID ORDER BY START_DATE DESC,END_DATE DESC LIMIT 1) AS SECTION_ID,
                         (SELECT ID FROM student_enrollment WHERE SYEAR='" . UserSyear() . "' AND STUDENT_ID=s.STUDENT_ID ORDER BY START_DATE DESC,END_DATE DESC LIMIT 1) AS ENROLLMENT_ID
@@ -1710,7 +1774,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                         if (User('PROFILE_ID') != '')
                             $can_use_RET = DBGet(DBQuery("SELECT MODNAME FROM profile_exceptions WHERE PROFILE_ID='" . User('PROFILE_ID') . "' AND CAN_USE='Y'"), array(), array('MODNAME'));
                         else {
-                            $profile_id_mod = DBGet(DBQuery("SELECT PROFILE_ID FROM staff WHERE USER_ID='" . User('STAFF_ID')));
+                            $profile_id_mod = DBGet(DBQuery("SELECT PROFILE_ID FROM staff WHERE USER_ID='" . User('STAFF_ID')."'"));
                             $profile_id_mod = $profile_id_mod[1]['PROFILE_ID'];
                             if ($profile_id_mod != '')
                                 $can_use_RET = DBGet(DBQuery("SELECT MODNAME FROM profile_exceptions WHERE PROFILE_ID='" . $profile_id_mod . "' AND CAN_USE='Y'"), array(), array('MODNAME'));
@@ -1739,8 +1803,55 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                             else
                                 $include = 'OtherInfoInc';
 
+                            switch ($category['TITLE'] ) {
+                                case 'General Info':
+                                    $categoryTitle = _generalInfo;
+                                    break;
+                                case 'Addresses &amp; Contacts':
+                                    $categoryTitle = _addressesContacts;
+                                    break;
+                                case 'Medical':
+                                    $categoryTitle = _medical;
+                                    break;
+                                case 'Comments':
+                                    $categoryTitle = _comments;
+                                    break;
+                                case 'Goals':
+                                    $categoryTitle = _goals;
+                                    break;
+                                case 'Enrollment Info':
+                                    $categoryTitle = _enrollmentInfo;
+                                    break;
+                                case 'Files':
+                                    $categoryTitle = _files;
+                                    break;
+                                default:
+                                    $categoryTitle = $category['TITLE'] ;
+                                    break;
+                                // case 'Demographic Info':
+                                //     $categoryTitle = _demographicInfo;
+                                //     break;
+                                // case 'Addresses &amp; Contacts':
+                                //     $categoryTitle = _addressesContacts;
+                                //     break;
+                                // case 'School Information':
+                                //     $categoryTitle = _schoolInformation;
+                                //     break;
+                                // case 'Certification Information':
+                                //     $categoryTitle = _certificationInformation;
+                                //     break;
+                                // case 'Schedule':
+                                //     $categoryTitle = _schedule;
+                                //     break;
+                            }
+                            
+                            // print_r($category);
+                            // echo "<br>";
+                            // echo "<"
+                            // echo "$categoryTitle<br>";
+
                             //$tabs[] = array('title' => $category['TITLE'], 'link' => "Modules.php?modname=students/Student.php&include=EnrollmentInfoInc&category_id=6");
-                            $tabs[] = array('title' => $category['TITLE'], 'link' => "Modules.php?modname=students/Student.php&include=$include&category_id=$category[ID]");
+                            $tabs[] = array('title' => $categoryTitle, 'link' => "Modules.php?modname=students/Student.php&include=$include&category_id=$category[ID]");
                         }
                     }
                     unset($new_tabs);
@@ -1748,14 +1859,14 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                     unset($td);
                     $swap_tabs = 'n';
                     foreach ($tabs as $ti => $td) {
-                        if ($td['title'] == 'Enrollment Info')
+                        if ($td['title'] == _enrollmentInfo)
                             $swap_tabs = 'y';
                     }
                     if ($swap_tabs == 'y') {
                         foreach ($tabs as $ti => $td) {
-                            if ($td['title'] == 'General Info')
+                            if ($td['title'] == _generalInfo)
                                 $new_tabs[0] = $td;
-                            elseif ($td['title'] == 'Enrollment Info')
+                            elseif ($td['title'] == _enrollmentInfo)
                                 $new_tabs[1] = $td;
                             else
                                 $new_tabs[$ti + 1] = $td;
@@ -1792,7 +1903,7 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                     }
 
                     if (isset($_REQUEST['goal_id']) && $_REQUEST['goal_id'] != 'new' && !isset($_REQUEST['progress_id']))
-                        $buttons = SubmitButton('Save', '', 'class="btn btn-primary pull-right" onclick="formcheck_student_student();"');
+                        $buttons = SubmitButton(_save, '', 'id="mod_student_btn" class="btn btn-primary pull-right" onclick="formcheck_student_student(this);"');
                     else {
                         if ($_REQUEST['student_id'] != 'new') {
 
@@ -1801,15 +1912,15 @@ if ($_REQUEST['action'] != 'delete' && $_REQUEST['action'] != 'delete_goal') {
                             $enrollment_info = DBGet(DBQuery('SELECT ENROLLMENT_CODE FROM student_enrollment WHERE STUDENT_ID=' . $student_id));
                             $enrollment_code = $enrollment_info[1]['ENROLLMENT_CODE'];
                             if ($_REQUEST['category_id'] == 1 && $enrollment_code == NULL)
-                                $buttons = SubmitButton('Save', '', 'class="btn btn-primary" onclick="formcheck_student_student();"');
+                                $buttons = SubmitButton(_save, '', 'id="mod_student_btn" class="btn btn-primary" onclick="formcheck_student_student(this);"');
                             else
-                                $buttons = SubmitButton('Save', '', 'class="btn btn-primary" onclick="formcheck_student_student();"');
+                                $buttons = SubmitButton(_save, '', 'id="mod_student_btn" class="btn btn-primary" onclick="formcheck_student_student(this);"');
                         }
                         else {
                             if ($_REQUEST['category_id'] == 1)
-                                $buttons = SubmitButton('Save & Next', '', 'class="btn btn-primary" onclick="formcheck_student_student();"');
+                                $buttons = SubmitButton(_saveNext, '', 'id="mod_student_btn" class="btn btn-primary" onclick="formcheck_student_student(this);"');
                             else
-                                $buttons = SubmitButton('Save', '', 'class="btn btn-primary" onclick="formcheck_student_student();"');
+                                $buttons = SubmitButton(_save, '', 'id="mod_student_btn" class="btn btn-primary" onclick="formcheck_student_student(this);"');
                         }
                     }
                     echo PopTable('footer',$buttons);

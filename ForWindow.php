@@ -41,7 +41,6 @@ array_rwalk($_REQUEST, 'strip_tags');
 $css = getCSS();
 
 //echo "<link rel='stylesheet' type='text/css' href='themes/".strtolower(trim($css))."/".  ucwords(trim($css)).".css'>";
-echo '<link href="https://fonts.googleapis.com/css?family=Roboto:400,300,100,500,700,900" rel="stylesheet" type="text/css">';
 echo '<link href="assets/css/icons/icomoon/styles.css" rel="stylesheet" type="text/css">';
 echo '<link href="assets/css/bootstrap.css" rel="stylesheet" type="text/css">';
 echo '<link href="assets/css/icons/fontawesome/styles.min.css" rel="stylesheet" type="text/css">';
@@ -122,7 +121,7 @@ if (clean_param($_REQUEST['modname'], PARAM_NOTAGS)) {
                 $ip = $_SERVER['REMOTE_ADDR'];
             }
 
-            echo "You're not allowed to use this program! This attempted violation has been logged and your IP address was captured.";
+            echo ""._youReNotAllowedToUseThisProgram."! "._thisAttemptedViolationHasBeenLoggedAndYourIpAddressWasCaptured.".";
 
             DBQuery("INSERT INTO hacking_log (HOST_NAME,IP_ADDRESS,LOGIN_DATE,VERSION,PHP_SELF,DOCUMENT_ROOT,SCRIPT_NAME,MODNAME,USERNAME) values('$_SERVER[SERVER_NAME]','$ip','" . date('Y-m-d') . "','$openSISVersion','$_SERVER[PHP_SELF]','$_SERVER[DOCUMENT_ROOT]','$_SERVER[SCRIPT_NAME]','" . optional_param('modname', '', PARAM_NOTAGS) . "','" . User('USERNAME') . "')");
             Warehouse('footer');

@@ -29,7 +29,7 @@
 include('../../RedirectModulesInc.php');
 if (isset($_REQUEST['custom_date_id']) && count($_REQUEST['custom_date_id']) > 0) {
     foreach ($_REQUEST['custom_date_id'] as $custom_id) {
-        $_REQUEST['staff']['CUSTOM_' . $custom_id] = $_REQUEST['year_CUSTOM_' . $custom_id] . '-' . MonthFormatter($_REQUEST['month_CUSTOM_' . $custom_id]) . '-' . $_REQUEST['day_CUSTOM_' . $custom_id];
+        $_REQUEST['staff']['CUSTOM_' . $custom_id] = $_REQUEST['year_CUSTOM_' . $custom_id] . '-' . $_REQUEST['month_CUSTOM_' . $custom_id] . '-' . $_REQUEST['day_CUSTOM_' . $custom_id];
     }
 }
 if (isset($_REQUEST['user_checkbox']) && count($_REQUEST['user_checkbox']) > 0) {
@@ -69,11 +69,11 @@ if (isset($_REQUEST['staff_id']) && $_REQUEST['staff_id'] != 'new') {
         $count_staff_RET = DBGet(DBQuery('SELECT COUNT(*) AS NUM FROM people'));
         if ($count_staff_RET[1]['NUM'] > 1) {
             echo '<div class="panel panel-default">';
-            DrawHeader('Selected User : ' . $RET[1]['FIRST_NAME'] . '&nbsp;' . $RET[1]['LAST_NAME'], '<span class="heading-text"><A HREF=Modules.php?modname=' . $_REQUEST['modname'] . '&search_modfunc=list&next_modname=users/User.php&ajax=true&bottom_back=true&return_session=true' . ($_REQUEST['profile'] == 'none' ? '&profile=none' : '') . ' target=body><i class="icon-square-left"></i> Back to User List</A></span><div class="btn-group heading-btn"><A HREF=Side.php?staff_id=new&modcat=' . $_REQUEST['modcat'] . ' class="btn btn-danger btn-xs">Deselect</A></div>');
+            DrawHeader(''._selectedUser.' : ' . $RET[1]['FIRST_NAME'] . '&nbsp;' . $RET[1]['LAST_NAME'], '<span class="heading-text"><A HREF=Modules.php?modname=' . $_REQUEST['modname'] . '&search_modfunc=list&next_modname=users/User.php&ajax=true&bottom_back=true&return_session=true' . ($_REQUEST['profile'] == 'none' ? '&profile=none' : '') . ' target=body><i class="icon-square-left"></i> '._backToUserList.'</A></span><div class="btn-group heading-btn"><A HREF=Side.php?staff_id=new&modcat=' . $_REQUEST['modcat'] . ' class="btn btn-danger btn-xs">'._deselect.'</A></div>');
             echo '</div>';
         } else {
             echo '<div class="panel panel-default">';
-            DrawHeader('Selected User : ' . $RET[1]['FIRST_NAME'] . '&nbsp;' . $RET[1]['LAST_NAME'], '<div class="btn-group heading-btn"><A HREF=Side.php?staff_id=new&modcat=' . $_REQUEST['modcat'] . ' class="btn btn-danger btn-xs">Deselect</A></div>');
+            DrawHeader(''._selectedUser.' : ' . $RET[1]['FIRST_NAME'] . '&nbsp;' . $RET[1]['LAST_NAME'], '<div class="btn-group heading-btn"><A HREF=Side.php?staff_id=new&modcat=' . $_REQUEST['modcat'] . ' class="btn btn-danger btn-xs">'._deselect.'</A></div>');
             echo '</div>';
         }
     }
@@ -134,6 +134,45 @@ if ($_REQUEST['modfunc'] == 'remove_stu') {
         $up_go = 'n';
 
         if ($_REQUEST['category_id'] == 1) {
+            
+            
+            
+            if(count($_REQUEST['staff'])>0){
+            
+                  $disp_error = '';
+            if ($_REQUEST['modfunc'] == 'update') {
+//                print_r($_REQUEST);
+                $flag = 0;
+                $qry = 'UPDATE people SET ';
+//                print_r($_REQUEST['people']);
+                foreach ($_REQUEST['staff'] as $in => $d) {
+
+                    $field_id = explode('_', $in);
+                    $field_id = $field_id[1];
+                    $check_stat = DBGet(DBQuery('SELECT TITLE,REQUIRED FROM people_fields WHERE ID=\'' . $field_id . '\' '));
+                    if ($check_stat[1]['REQUIRED'] == 'Y') {
+                        if ($d != '') {
+                            $qry.=' ' . $in . '=\'' . str_replace("'", "''", str_replace("\'", "'", $d)) . '\',';
+                            $flag++;
+                        } else {
+                            $disp_error = '<font style="color:red"><b>' . $check_stat[1]['TITLE'] . ' is required.</b></font>';
+                        }
+                    } else {
+                        if ($d != '')
+                            $qry.=' ' . $in . '=\'' . str_replace("'", "''", str_replace("\'", "'", $d)) . '\',';
+                        else
+                            $qry.=' ' . $in . '=NULL,';
+
+                        $flag++;
+                    }
+                }
+                if ($flag > 0) {
+
+                    $qry = substr($qry, 0, -1) . ' WHERE STAFF_ID=' . $_REQUEST['staff_id'];
+                    DBQuery($qry);
+                }
+            }
+            }
             if (count($_REQUEST['people']) > 0) {
                 $staff_info_sql = "SELECT PROFILE_ID FROM people WHERE STAFF_ID=" . $_REQUEST['staff_id'];
                 $staff_info = DBGet(DBQuery($staff_info_sql));
@@ -226,9 +265,12 @@ if ($_REQUEST['modfunc'] == 'remove_stu') {
 
             $disp_error = '';
             if ($_REQUEST['modfunc'] == 'update') {
+//                print_r($_REQUEST);
                 $flag = 0;
                 $qry = 'UPDATE people SET ';
-                foreach ($_REQUEST['people'] as $in => $d) {
+//                print_r($_REQUEST['people']);
+                foreach ($_REQUEST['staff'] as $in => $d) {
+
                     $field_id = explode('_', $in);
                     $field_id = $field_id[1];
                     $check_stat = DBGet(DBQuery('SELECT TITLE,REQUIRED FROM people_fields WHERE ID=\'' . $field_id . '\' '));
@@ -271,14 +313,14 @@ if ($_REQUEST['modfunc'] == 'remove_stu') {
 
     if (basename($_SERVER['PHP_SELF']) != 'index.php') {
         if ($_REQUEST['staff_id'] == 'new')
-            DrawBC("Users > Add a User");
+            DrawBC(""._users." > Add a User");
         else
-            DrawBC("Users > " . ProgramTitle());
+            DrawBC(""._users." > " . ProgramTitle());
         unset($_SESSION['staff_id']);
 
         Search('staff_id', $extra);
     } else
-        DrawHeader('Create Account');
+        DrawHeader(_createAccount);
 
     if (clean_param($_REQUEST['modfunc'], PARAM_ALPHAMOD) == 'delete' && basename($_SERVER['PHP_SELF']) != 'index.php' && AllowEdit()) {
         if (DeletePrompt('user')) {
@@ -319,7 +361,7 @@ if ($_REQUEST['modfunc'] == 'remove_stu') {
 
         if (basename($_SERVER['PHP_SELF']) != 'index.php') {
             if (UserStaffID() && UserStaffID() != User('STAFF_ID') && UserStaffID() != $_SESSION['STAFF_ID'] && User('PROFILE') == 'admin')
-                $delete_button = '<INPUT type=button class="btn btn-danger" value=Delete onclick="window.location=\'Modules.php?modname=' . $_REQUEST['modname'] . '&modfunc=delete\'">';
+                $delete_button = '<INPUT type=button class="btn btn-danger" value='._delete.' onclick="window.location=\'Modules.php?modname=' . $_REQUEST['modname'] . '&modfunc=delete\'">';
         }
 
         if (User('PROFILE_ID') != '')
@@ -346,11 +388,23 @@ if ($_REQUEST['modfunc'] == 'remove_stu') {
                     $include = $category['INCLUDE'];
                 else
                     $include = 'OtherInfoUserInc';
+                    // echo "$category[TITLE]<br>";
+                switch ($category['TITLE'] ) {
+                    case 'General Info':
+                        $categoryTitle = _generalInfo;
+                        break;
+                    case 'Address Info':
+                        $categoryTitle = _addressInfo;
+                        break;
+                    default:
+                        $categoryTitle = $category['TITLE'] ;
+                        break;
+                }
 
                 if (User('PROFILE_ID') == 4)
-                    $tabs[] = array('title' => $category['TITLE'], 'link' => "Modules.php?modname=$_REQUEST[modname]&include=$include&category_id=" . $category['ID'] . ($_REQUEST['profile'] == 'none' ? '&profile=none' : ''));
+                    $tabs[] = array('title' => $categoryTitle, 'link' => "Modules.php?modname=$_REQUEST[modname]&include=$include&category_id=" . $category['ID'] . ($_REQUEST['profile'] == 'none' ? '&profile=none' : ''));
                 else
-                    $tabs[] = array('title' => $category['TITLE'], 'link' => "Modules.php?modname=$_REQUEST[modname]&include=$include&category_id=" . $category['ID'] . "&staff_id=" . UserStaffID() . ($_REQUEST['profile'] == 'none' ? '&profile=none' : ''));
+                    $tabs[] = array('title' => $categoryTitle, 'link' => "Modules.php?modname=$_REQUEST[modname]&include=$include&category_id=" . $category['ID'] . "&staff_id=" . UserStaffID() . ($_REQUEST['profile'] == 'none' ? '&profile=none' : ''));
             }
         }
 
@@ -377,7 +431,7 @@ if ($_REQUEST['modfunc'] == 'remove_stu') {
 
         $sql = 'SELECT count(s.ID) as schools FROM schools s,staff st INNER JOIN staff_school_relationship ssr USING(staff_id) WHERE s.id=ssr.school_id AND ssr.syear=' . UserSyear() . ' AND st.staff_id=' . User('STAFF_ID');
         $school_admin = DBGet(DBQuery($sql));
-        $submit_btn = SubmitButton('Save', '', 'class="btn btn-primary pull-right" onclick="return formcheck_user_user_mod(' . $_SESSION[staff_school_chkbox_id] . ');"');
+        $submit_btn = SubmitButton(_save, '', 'id="saveUserBtn" class="btn btn-primary pull-right" onclick="return formcheck_user_user_mod(' . $_SESSION[staff_school_chkbox_id] . ', this);"');
 
         PopTable('footer', $submit_btn);
         echo '</FORM>';

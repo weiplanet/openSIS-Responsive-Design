@@ -40,10 +40,20 @@ if ($_REQUEST['modfunc'] == 'update') {
     }
     foreach ($_REQUEST['values'] as $id => $columns) {
         if ($id != 'new') {
+
             $sql = 'UPDATE history_marking_periods SET ';
 
             foreach ($columns as $column => $value)
-                $sql .= $column . '=\'' . str_replace("\'", "''", trim($value)) . '\',';
+            {
+                if($column == 'POST_END_DATE')
+                {
+                    $sql .= $column . '=\'' . date("Y-m-d", strtotime($value)) . '\',';
+                }
+                else
+                {
+                    $sql .= $column . '=\'' . str_replace("\'", "''", trim($value)) . '\',';
+                }
+            }
 
             if ($_REQUEST['tab_id'] != 'new')
                 $sql = substr($sql, 0, -1) . ' WHERE MARKING_PERIOD_ID=\'' . $id . '\'';
@@ -52,6 +62,7 @@ if ($_REQUEST['modfunc'] == 'update') {
             DBQuery($sql);
         }
         else {
+
             DBQuery('INSERT INTO marking_period_id_generator (id)VALUES (NULL)');
             $id_RET = DBGet(DBQuery('SELECT  max(id) AS ID from marking_period_id_generator'));
             $MARKING_PERIOD_ID_VALUE = $id_RET[1]['ID'];
@@ -63,7 +74,16 @@ if ($_REQUEST['modfunc'] == 'update') {
             foreach ($columns as $column => $value)
                 if ($value) {
                     $fields .= $column . ',';
-                    $values .= '\'' . str_replace("\'", "''", $value) . '\',';
+
+                    if($column == 'POST_END_DATE')
+                    {
+                        $values .= '\'' . date("Y-m-d", strtotime($value)) . '\',';
+                    }
+                    else
+                    {
+                        $values .= '\'' . str_replace("\'", "''", $value) . '\',';
+                    }
+
                     $go = true;
                 }
             $sql .= '(' . substr($fields, 0, -1) . ') values(' . substr($values, 0, -1) . ')';
@@ -75,14 +95,14 @@ if ($_REQUEST['modfunc'] == 'update') {
     unset($_REQUEST['modfunc']);
 }
 if ($_REQUEST['modfunc'] == 'remove') {
-    if (DeletePromptX('History Marking Period')) {
+    if (DeletePromptX(_historyMarkingPeriod)) {
         DBQuery('DELETE FROM history_marking_periods WHERE MARKING_PERIOD_ID=\'' . $_REQUEST['id'] . '\'');
     }
 }
 
 if (!$_REQUEST['modfunc']) {
     echo "<FORM action=Modules.php?modname=" . strip_tags(trim($_REQUEST[modname])) . "&modfunc=update&tab_id=" . strip_tags(trim($_REQUEST[tab_id])) . "&mp_id=$mp_id method=POST>";
-    DrawHeader(ProgramTitle(), SubmitButton('Save', '', 'class="btn btn-primary"'));
+    DrawHeader(ProgramTitle(), SubmitButton(_save, '', 'class="btn btn-primary" onclick="self_disable(this);"'));
     echo '<hr class="no-margin"/>';
 
     $sql = 'SELECT * FROM history_marking_periods WHERE SCHOOL_ID = ' . UserSchool() . ' ORDER BY POST_END_DATE';
@@ -92,10 +112,10 @@ if (!$_REQUEST['modfunc']) {
         'POST_END_DATE' => 'makeDateInput',
         'SYEAR' => 'makeSchoolYearSelectInput'
     );
-    $LO_columns = array('MP_TYPE' => 'Type',
-        'NAME' => 'Name',
-        'POST_END_DATE' => 'Grade Post Date',
-        'SYEAR' => 'School Year'
+    $LO_columns = array('MP_TYPE' =>_type,
+        'NAME' =>_name,
+        'POST_END_DATE' =>_gradePostDate,
+        'SYEAR' =>_schoolYear,
     );
     $link['add']['html'] = array('MP_TYPE' => makeSelectInput('', 'MP_TYPE'),
         'NAME' => makeTextInput('', 'NAME'),
@@ -110,9 +130,9 @@ if (!$_REQUEST['modfunc']) {
     $LO_ret = DBGet(DBQuery($sql), $functions);
 
     echo '<div class="panel-body no-padding">';
-    ListOutput($LO_ret, $LO_columns, 'History Marking Period', 'History Marking Periods', $link, array(), array('count' => true, 'download' => false, 'search' => false));
+    ListOutput($LO_ret, $LO_columns,  _historyMarkingPeriod, _historyMarkingPeriods, $link, array(), array('count' =>true, 'download' =>true, 'search' =>false));
     echo '</div>';
-    echo '<div class="panel-footer p-r-20 text-right">' . SubmitButton('Save', '', 'class="btn btn-primary"') . '</div>';
+    echo '<div class="panel-footer p-r-20 text-right">' . SubmitButton(_save, '', 'class="btn btn-primary" onclick="self_disable(this);"') . '</div>';
     echo '</FORM>';
 }
 
@@ -154,7 +174,10 @@ function makeSelectInput($value, $name) {
     else
         $id = 'new';
 
-    $options = array('year' => 'Year', 'semester' => 'Semester', 'quarter' => 'Quarter');
+    $options = array('year' => _year,
+     'semester' => _semester,
+     'quarter' => _quarter,
+    );
 
     return SelectInput(trim($value), "values[$id][$name]", '', $options, false);
 }

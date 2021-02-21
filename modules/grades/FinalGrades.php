@@ -28,8 +28,14 @@
 #***************************************************************************************
 include('../../RedirectModulesInc.php');
 require_once('modules/grades/DeletePromptX.fnc.php');
+
+if(isset($_SESSION['student_id']) && $_SESSION['student_id'] != '')
+{
+    $_REQUEST['search_modfunc'] = 'list';
+}
+
 if (clean_param($_REQUEST['modfunc'], PARAM_ALPHAMOD) == 'delete') {
-    if (($dp = DeletePromptX('final grade'))) {
+    if (($dp = DeletePromptX(_finalGrade))) {
         DBQuery('DELETE FROM student_report_card_grades WHERE SYEAR=\'' . UserSyear() . '\' AND STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND COURSE_PERIOD_ID=\'' . $_REQUEST['course_period_id'] . '\' AND MARKING_PERIOD_ID=\'' . $_REQUEST['marking_period_id'] . '\'');
         DBQuery('DELETE FROM student_report_card_comments WHERE SYEAR=\'' . UserSyear() . '\' AND STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND COURSE_PERIOD_ID=\'' . $_REQUEST['course_period_id'] . '\' AND MARKING_PERIOD_ID=\'' . $_REQUEST['marking_period_id'] . '\'');
         $_REQUEST['modfunc'] = 'save';
@@ -152,11 +158,14 @@ if (clean_param($_REQUEST['modfunc'], PARAM_ALPHAMOD) == 'save') {
         }
 
         if (count($RET)) {
-            DrawBC("Gradebook > " . ProgramTitle());
+            DrawBC(""._gradebook." > " . ProgramTitle());
 
-            $columns = array('FULL_NAME' => 'Student', 'COURSE_TITLE' => 'Course');
+            $columns = array('FULL_NAME' =>_student,
+             'COURSE_TITLE' =>_course,
+            );
             if ($_REQUEST['elements']['teacher'] == 'Y')
-                $columns += array('TEACHER' => 'Teacher');
+                $columns += array('TEACHER' =>_teacher,
+            );
             if ($_REQUEST['elements']['period_absences'] == 'Y')
                 $columns['ABSENCES'] = 'Abs<BR>YTD / MP';
             foreach ($_REQUEST['mp_arr'] as $mp) {
@@ -165,7 +174,7 @@ if (clean_param($_REQUEST['modfunc'], PARAM_ALPHAMOD) == 'save') {
                 $columns[$mp] = GetMP($mp);
             }
             if ($_REQUEST['elements']['comments'] == 'Y')
-                $columns['COMMENT'] = 'Comment';
+                $columns['COMMENT'] = _comment;
             $i = 0;
             foreach ($RET as $student_id => $course_periods) {
                 $course_period_id = key($course_periods);
@@ -226,20 +235,20 @@ if (clean_param($_REQUEST['modfunc'], PARAM_ALPHAMOD) == 'save') {
                 $link['remove']['variables'] = array('student_id' => 'STUDENT_ID', 'course_period_id' => 'COURSE_PERIOD_ID', 'marking_period_id' => 'MARKING_PERIOD_ID');
             }
             echo '<div class="panel panel-default">';
-            ListOutputGrade($grades_RET, $columns, 'Course', 'Courses', $link);
+            ListOutputGrade($grades_RET, $columns, _course, _courses, $link);
             echo '</div>';
         } else {
 
             if (User('PROFILE') == 'parent' || User('PROFILE') == 'student')
-                ShowErr('No grade found.');
+                ShowErr(_noGradeFound.'.');
             else
-                ShowErr('No Students were found.');
+                ShowErr(_noStudentsWereFound.'.');
             for_error();
         }
     }
     else {
 
-        ShowErr('You must choose at least one student and marking period');
+        ShowErr(_youMustChooseAtLeastOneStudentAndMarkingPeriod.'.');
         for_error();
     }
 }
@@ -254,7 +263,7 @@ if (!$_REQUEST['modfunc']) {
     echo '<div class="modal-content">';
     echo '<div class="modal-header">';
     echo '<button type="button" class="close" data-dismiss="modal">×</button>';
-    echo '<h4 class="modal-title">Choose course</h4>';
+    echo '<h4 class="modal-title">'._chooseCourse.'</h4>';
     echo '</div>';
 
     echo '<div class="modal-body">';
@@ -265,9 +274,9 @@ if (!$_REQUEST['modfunc']) {
     $QI = DBQuery($sql);
     $subjects_RET = DBGet($QI);
 
-    echo '<h6>' . count($subjects_RET) . ((count($subjects_RET) == 1) ? ' Subject was' : ' Subjects were') . ' found.</h6>';
+    echo '<h6>' . count($subjects_RET) . ((count($subjects_RET) == 1) ? ' '._subjectWas : ' '._subjectsWere) . ' '._found.'.</h6>';
     if (count($subjects_RET) > 0) {
-        echo '<table class="table table-bordered"><thead><tr class="alpha-grey"><th>Subject</th></tr></thead>';
+        echo '<table class="table table-bordered"><thead><tr class="alpha-grey"><th>'._subject.'</th></tr></thead>';
         foreach ($subjects_RET as $val) {
             echo '<tr><td><a href=javascript:void(0); onclick="chooseCpModalSearch(' . $val['SUBJECT_ID'] . ',\'courses\')">' . $val['TITLE'] . '</a></td></tr>';
         }
@@ -286,7 +295,7 @@ if (!$_REQUEST['modfunc']) {
 
 
 
-    DrawBC("Gradebook > " . ProgramTitle());
+    DrawBC(""._gradebook." > " . ProgramTitle());
 
     if ($_REQUEST['search_modfunc'] == 'list') {
         $_openSIS['allow_edit'] = true;
@@ -295,22 +304,22 @@ if (!$_REQUEST['modfunc']) {
 
         $attendance_codes = DBGet(DBQuery('SELECT SHORT_NAME,ID FROM attendance_codes WHERE SYEAR=\'' . UserSyear() . '\' AND SCHOOL_ID=\'' . UserSchool() . '\' AND (DEFAULT_CODE!=\'Y\' OR DEFAULT_CODE IS NULL) AND TABLE_NAME=\'0\''));
         //PopTable_wo_header('header');
-        $extra['extra_header_left'] = '<h5 class="text-primary no-margin-top">Include on Grade List:</h5>';
+        $extra['extra_header_left'] = '<h5 class="text-primary no-margin-top">'._includeOnGradeList.':</h5>';
         $extra['extra_header_left'] .= '<div class="row">';
-        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[teacher] value=Y CHECKED><span></span>Teacher</label></div></div></div>';
-        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[comments] value=Y CHECKED><span></span>Comments</label></div></div></div>';
-        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[percents] value=Y><span></span>Percents</label></div></div></div>';
-        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[ytd_absences] value=Y CHECKED><span></span>Year-to-date Daily Absences</label></div></div></div>';
-        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[mp_absences] value=Y' . (GetMP(UserMP(), 'SORT_ORDER') != 1 ? ' CHECKED' : '') . '><span></span>Daily Absences this quarter</label></div></div></div>';
-        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4 form-inline"><div class="form-group mb-15"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[ytd_tardies] value=Y><span></span> Other Attendance Year-to-date:</label></div> <SELECT name="ytd_tardies_code" class="form-control input-xs">';
+        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[teacher] value=Y CHECKED><span></span>'._teacher.'</label></div></div></div>';
+        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[comments] value=Y CHECKED><span></span>'._comments.'</label></div></div></div>';
+        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[percents] value=Y><span></span>'._percents.'</label></div></div></div>';
+        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[ytd_absences] value=Y CHECKED><span></span>'._yearToDateDailyAbsences.'</label></div></div></div>';
+        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[mp_absences] value=Y' . (GetMP(UserMP(), 'SORT_ORDER') != 1 ? ' CHECKED' : '') . '><span></span>'._dailyAbsencesThisQuarter.'</label></div></div></div>';
+        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4 form-inline"><div class="form-group mb-15"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[ytd_tardies] value=Y><span></span>'._otherAttendanceYearToDate.':</label></div> <SELECT name="ytd_tardies_code" class="form-control input-xs">';
         foreach ($attendance_codes as $code)
             $extra['extra_header_left'] .= '<OPTION value=' . $code['ID'] . '>' . $code['SHORT_NAME'] . '</OPTION>';
         $extra['extra_header_left'] .= '</SELECT></div></div>';
-        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4 form-inline"><div class="form-group mb-15"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[mp_tardies] value=Y><span></span>Other Attendance this quarter:</label></div> <SELECT name="mp_tardies_code" class="form-control input-xs">';
+        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4 form-inline"><div class="form-group mb-15"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[mp_tardies] value=Y><span></span>'._otherAttendanceThisQuarter.':</label></div> <SELECT name="mp_tardies_code" class="form-control input-xs">';
         foreach ($attendance_codes as $code)
             $extra['extra_header_left'] .= '<OPTION value=' . $code['ID'] . '>' . $code['SHORT_NAME'] . '</OPTION>';
         $extra['extra_header_left'] .= '</SELECT></div></div>';
-        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[period_absences] value=Y><span></span>Period-by-period absences</label></div></div></div>';
+        $extra['extra_header_left'] .= '<div class="col-md-6 col-lg-4"><div class="form-group"><div class="checkbox checkbox-switch switch-success switch-xs"><label><INPUT type=checkbox name=elements[period_absences] value=Y><span></span>'._periodByPeriodAbsences.'</label></div></div></div>';
         $extra['extra_header_left'] .= '</div>';
 
 
@@ -327,10 +336,11 @@ if (!$_REQUEST['modfunc']) {
             $mps_RET = DBGet(DBQuery('SELECT MARKING_PERIOD_ID,SHORT_NAME FROM school_years WHERE SYEAR=\'' . UserSyear() . '\' AND SCHOOL_ID=\'' . UserSchool() . '\' ORDER BY SORT_ORDER'), array(), array('MARKING_PERIOD_ID'));
         }
 
-        $extra['extra_header_left'] .= '<h5 class="text-primary">Marking Periods</h5>';
+        $extra['extra_header_left'] .= '<h5 class="text-primary">'._markingPeriods.'</h5>';
         $extra['extra_header_left'] .= '<div class="form-inline">';
         foreach ($mps_RET as $sem => $quarters) {
             foreach ($quarters as $qtr) {
+                $qtr1=$qtr['MARKING_PERIOD_ID'];
                 $pro = GetChildrenMP('PRO', $qtr['MARKING_PERIOD_ID']);
                 if ($pro) {
                     $pros = explode(',', str_replace("'", '', $pro));
@@ -340,7 +350,11 @@ if (!$_REQUEST['modfunc']) {
                             $extra['extra_header_left'] .= '<div class="form-group"><label class="checkbox-inline"><INPUT class="styled" type=checkbox name=mp_arr[] value=' . $pro . '>' . GetMP($pro, 'SHORT_NAME') . '</label></div>';
                 }
                 $extra['extra_header_left'] .= '<div class="form-group"><label class="checkbox-inline"><INPUT class="styled" type=checkbox name=mp_arr[] value=' . $qtr['MARKING_PERIOD_ID'] . ' ' . (($qtr['MARKING_PERIOD_ID'] == GetCurrentMP($MP_TYPE, DBDate())) ? 'checked' : '') . '>' . $qtr['SHORT_NAME'] . '</label></div>';
-            }
+            
+                if (GetMP($qtr1, 'DOES_EXAM') == 'Y')
+                $extra['extra_header_left'] .= '<div class="form-group"><label class="checkbox-inline"><INPUT class="styled" type=checkbox name=mp_arr[] value=E' . $qtr1 . '>' . GetMP($qtr1 ,'SHORT_NAME') . ' Exam</label></div>';
+                }
+            
 
             if (GetMP($sem, 'DOES_EXAM') == 'Y')
                 if (GetMP($sem, 'DOES_EXAM') == 'Y')
@@ -358,11 +372,16 @@ if (!$_REQUEST['modfunc']) {
         $extra['extra_header_left'] .= '</div>';
     }
 
-    $extra['link'] = array('FULL_NAME' => false);
+    $extra['link'] = array('FULL_NAME' =>false);
     $extra['SELECT'] = ",s.STUDENT_ID AS CHECKBOX";
+    if(isset($_SESSION['student_id']) && $_SESSION['student_id'] != '')
+    {
+        $extra['WHERE'] .= ' AND s.STUDENT_ID=' . $_SESSION['student_id'];
+    }
     $extra['functions'] = array('CHECKBOX' => '_makeChooseCheckbox');
+     $extra['columns_before'] = array('CHECKBOX' => '</A><INPUT type=checkbox value=Y name=controller onclick="checkAll(this.form,this.form.controller.checked,\'st_arr\');"><A>');
    // $extra['columns_before'] = array('CHECKBOX' => '</A><INPUT type=checkbox value=Y name=controller onclick="checkAll(this.form,this.form.controller.checked,\'unused\');"><A>');
-    $extra['columns_before'] = array('CHECKBOX' => '</A><INPUT type=checkbox value=Y name=controller onclick="checkAllDtMod(this,\'st_arr\');"><A>');
+  //  $extra['columns_before'] = array('CHECKBOX' => '</A><INPUT type=checkbox value=Y name=controller onclick="checkAllDtMod(this,\'st_arr\');"><A>');
     $extra['new'] = true;
     $extra['options']['search'] = false;
     $extra['force_search'] = true;
@@ -392,14 +411,18 @@ if (!$_REQUEST['modfunc']) {
     $extra['search'] .= '</div>'; //.col-lg-6
     $extra['search'] .= '</div>'; //.row
 
+    if ($_REQUEST['search_modfunc'] == 'list') {
+        //if ($_SESSION['count_stu'] != 0) {
+            $extra['footer'] = '<div class="panel-footer text-right p-r-20">' . SubmitButtonModal(_createGradeListsForSelectedStudents, '', 'class="btn btn-primary" onclick="self_disable(this);"') . '</div>';
+        //}
+    }
     Search('student_id', $extra, 'true');
 
     if ($_REQUEST['search_modfunc'] == 'list') {
+        
         if ($_SESSION['count_stu'] != 0) {
             unset($_SESSION['count_stu']);
-            echo '<div class="text-right p-b-20 p-r-20">' . SubmitButton('Create Grade Lists for Selected Students', '', 'class="btn btn-primary"') . '</div>';
         }
-        //PopTable('footer',$submit);
         echo "</FORM>";
     }
 }
@@ -413,11 +436,8 @@ if (!$_REQUEST['modfunc']) {
 
 function _makeChooseCheckbox($value, $title) {
     global $THIS_RET;
-    
-    
-//    return '<INPUT type=checkbox name=st_arr[] value=' . $value . ' checked>';
-    
-    return "<input name=unused_var[$THIS_RET[STUDENT_ID]] value=" . $THIS_RET[STUDENT_ID] . "  type='checkbox' id=$THIS_RET[STUDENT_ID] onClick='setHiddenCheckboxStudents(\"st_arr[$THIS_RET[STUDENT_ID]]\",this,$THIS_RET[STUDENT_ID]);' />";
+    return '<INPUT type=checkbox name=st_arr[] value=' . $value . '>';
+   // return "<input name=unused_var[$THIS_RET[STUDENT_ID]] value=" . $THIS_RET[STUDENT_ID] . "  type='checkbox' id=$THIS_RET[STUDENT_ID] onClick='setHiddenCheckboxStudents(\"st_arr[$THIS_RET[STUDENT_ID]]\",this,$THIS_RET[STUDENT_ID]);' />";
 }
 function _makeTeacher($teacher, $column) {
     return substr($teacher, strrpos(str_replace(' - ', ' ^ ', $teacher), '^') + 2);

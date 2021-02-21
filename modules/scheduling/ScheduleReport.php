@@ -27,7 +27,9 @@
 #
 #***************************************************************************************
 include('../../RedirectModulesInc.php');
-DrawBC("Scheduling > " . ProgramTitle());
+include('lang/language.php');
+
+DrawBC(""._scheduling." > " . ProgramTitle());
 //echo '<div class="panel panel-default">';
 if ($_REQUEST['subject_id']) {
     $RET = DBGet(DBQuery("SELECT TITLE FROM course_subjects WHERE SUBJECT_ID='" . $_REQUEST['subject_id'] . "'"));
@@ -45,13 +47,13 @@ if ($_REQUEST['subject_id']) {
             $header .= "<li><A class=\"text-white\" HREF=Modules.php?modname=$_REQUEST[modname]&modfunc=students&subject_id=$_REQUEST[subject_id]&course_id=$_REQUEST[course_id]&course_period_id=$_REQUEST[course_period_id]>" . $RET[1]['TITLE'] . '</A></li>';
         }
 
-        $header2 .= "&students=$location&modfunc=$location><i class=\"fa fa-list position-left\"></i> List Students</A></li><li>" . $header2 . "&unscheduled=true&students=$location&modfunc=$location><i class=\"fa fa-user-times position-left\"></i> List Unscheduled Students</A></li>";
+        $header2 .= "&students=$location&modfunc=$location><i class=\"fa fa-list position-left\"></i> "._listStudents."</A></li><li>" . $header2 . "&unscheduled=true&students=$location&modfunc=$location><i class=\"fa fa-user-times position-left\"></i> "._listStudents."</A></li>";
 
         echo '<div class="breadcrumb-line breadcrumb-line-component content-group-lg"><ul class="breadcrumb breadcrumb-white-text">'.$header.'</ul><ul class="breadcrumb-elements">'.$header2.'</ul></div>';
     } else
         echo '<div class="breadcrumb-line breadcrumb-line-component content-group-lg"><ul class="breadcrumb breadcrumb-white-text">'.$header.'</ul></div>';
 }
-$LO_options = array('save' => false, 'search' => false, 'print' => false);
+$LO_options = array('save' =>false, 'search' =>false, 'print' =>false);
 
 echo '<div class="row">';
 // SUBJECTS ----
@@ -68,7 +70,7 @@ if (!$_REQUEST['modfunc'] || ($_REQUEST['modfunc'] == 'courses' && $_REQUEST['st
     }
     $link['TITLE']['link'] = "Modules.php?modname=$_REQUEST[modname]&modfunc=courses";
     $link['TITLE']['variables'] = array('subject_id' => 'SUBJECT_ID');
-    ListOutput($RET, array('TITLE' => 'Subject'), 'Subject', 'Subjects', $link, array(), $LO_options);
+    ListOutput($RET, array('TITLE' => 'Subject'), _subject, _subjects, $link, array(), $LO_options);
     echo '</div>'; //.panel
     echo '</div>'; //.col-md-6
 }
@@ -90,8 +92,11 @@ if ($_REQUEST['modfunc'] == 'courses' || $_REQUEST['students'] == 'courses') {
         }
     }
     $QI = "SELECT c.COURSE_ID,c.TITLE,sum(cp.TOTAL_SEATS) as TOTAL_SEATS,sum(cp.FILLED_SEATS) as FILLED_SEATS,NULL AS OPEN_SEATS,(SELECT count(*) FROM schedule_requests sr WHERE sr.COURSE_ID=c.COURSE_ID) AS COUNT_REQUESTS FROM courses c,course_periods cp WHERE c.SUBJECT_ID='$_REQUEST[subject_id]' AND c.COURSE_ID=cp.COURSE_ID AND c.SYEAR='" . UserSyear() . "' AND c.SCHOOL_ID='" . UserSchool() . "' AND " . (count($other_mps) > 0 ? " (cp.MARKING_PERIOD_ID IN (" . UserMp() . "," . implode(',', $other_mps) . ") " : " (cp.MARKING_PERIOD_ID=" . UserMp()) . " OR cp.MARKING_PERIOD_ID IS NULL)  GROUP BY c.COURSE_ID,c.TITLE ORDER BY c.TITLE";
+
     $QI = DBQuery($QI);
-    $RET = DBGet($QI, array('OPEN_SEATS' => '_calcOpenSeats'));
+    
+    $RET = DBGet($QI, array('OPEN_SEATS' => '_calcOpenSeatsNew'));
+    
     if (count($RET) && $_REQUEST['course_id']) {
         foreach ($RET as $key => $value) {
             if ($value['COURSE_ID'] == $_REQUEST['course_id'])
@@ -100,7 +105,7 @@ if ($_REQUEST['modfunc'] == 'courses' || $_REQUEST['students'] == 'courses') {
     }
     $link['TITLE']['link'] = "Modules.php?modname=$_REQUEST[modname]&modfunc=course_periods&subject_id=$_REQUEST[subject_id]";
     $link['TITLE']['variables'] = array('course_id' => 'COURSE_ID');
-    ListOutput($RET, array('TITLE' => 'Course', 'COUNT_REQUESTS' => 'Requests', 'OPEN_SEATS' => 'Open', 'TOTAL_SEATS' => 'Total'), 'Course', 'Courses', $link, array(), $LO_options);
+    ListOutput($RET, array('TITLE' =>_course, 'COUNT_REQUESTS' =>_course, 'OPEN_SEATS' =>_course, 'TOTAL_SEATS' =>_total), _course, _courses, $link, array(), $LO_options);
     echo '</div>'; //.panel
     echo '</div>'; //.col-md-6
 }
@@ -122,8 +127,9 @@ if ($_REQUEST['modfunc'] == 'course_periods' || $_REQUEST['students'] == 'course
         }
     }
     $QI = "SELECT cp.COURSE_ID,cp.COURSE_PERIOD_ID,cp.TITLE,sum(cp.TOTAL_SEATS) as TOTAL_SEATS,sum(cp.FILLED_SEATS) as FILLED_SEATS,NULL AS OPEN_SEATS FROM course_periods cp WHERE cp.COURSE_ID='" . $_REQUEST['course_id'] . "' AND cp.SYEAR='" . UserSyear() . "' AND cp.SCHOOL_ID='" . UserSchool() . "' AND " . (count($other_mps) > 0 ? " (cp.MARKING_PERIOD_ID IN (" . UserMp() . "," . implode(',', $other_mps) . ") " : " (cp.MARKING_PERIOD_ID=" . UserMp()) . " OR cp.MARKING_PERIOD_ID IS NULL)  GROUP BY cp.COURSE_ID,cp.COURSE_PERIOD_ID,cp.TITLE ORDER BY cp.TITLE";
-
+  
     $QI = DBQuery($QI);
+  
     $RET = DBGet($QI, array('OPEN_SEATS' => '_calcOpenSeats'));
 
     if (count($RET) && $_REQUEST['course_period_id']) {
@@ -135,7 +141,7 @@ if ($_REQUEST['modfunc'] == 'course_periods' || $_REQUEST['students'] == 'course
     $link = array();
     $link['TITLE']['link'] = "Modules.php?modname=$_REQUEST[modname]&modfunc=students&students=course_periods&subject_id=$_REQUEST[subject_id]&course_id=$_REQUEST[course_id]";
     $link['TITLE']['variables'] = array('course_period_id' => 'COURSE_PERIOD_ID');
-    ListOutput($RET, array('TITLE' => 'Period - Teacher', 'OPEN_SEATS' => 'Open', 'TOTAL_SEATS' => 'Total'), 'Course Period', 'Course Periods', $link, array(), $LO_options);
+    ListOutput($RET, array('TITLE' =>_periodTeacher, 'OPEN_SEATS' =>_periodTeacher, 'TOTAL_SEATS' =>_total), _coursePeriod, _coursePeriods, $link, array(), $LO_options);
     echo '</div>'; //.panel
     echo '</div>'; //.col-md-6
 }
@@ -167,21 +173,32 @@ if ($_REQUEST['students']) {
     $link = array();
     $link['FULL_NAME']['link'] = "Modules.php?modname=scheduling/Schedule.php";
     $link['FULL_NAME']['variables'] = array('student_id' => 'STUDENT_ID');
-    ListOutput($RET, array('FULL_NAME' => 'Student', 'GRADE_ID' => 'Grade', 'BIRTHDATE' => 'Birthdate'), 'Student', 'Students', $link, array(), $LO_options);
+    ListOutput($RET, array('FULL_NAME' =>_student, 'GRADE_ID' =>_student, 'BIRTHDATE' =>_birthdate), _student, _students, $link, array(), $LO_options);
     echo '</div>'; //.panel
     echo '</div>'; //.col-md-6
 }
 
 echo '</div>'; //.row
-//echo '</div>'; //.panel
 
 function _calcOpenSeats($null) {
     global $THIS_RET;
+//    print_r($THIS_RET);
     $sql = "SELECT COUNT(*) as TOT
 				FROM schedule ss,students s,student_enrollment ssm
 				WHERE (('" . DBDate() . "' BETWEEN ss.START_DATE AND ss.END_DATE OR ss.END_DATE IS NULL) or (ss.END_DATE=(SELECT END_DATE from  course_periods where COURSE_PERIOD_ID='$THIS_RET[COURSE_PERIOD_ID]'))) AND (('" . DBDate() . "' BETWEEN ssm.START_DATE AND ssm.END_DATE OR ssm.END_DATE IS NULL)) AND s.STUDENT_ID=ss.STUDENT_ID AND s.STUDENT_ID=ssm.STUDENT_ID AND ssm.SYEAR='" . UserSyear() . "' AND ssm.SCHOOL_ID='" . UserSchool() . "' AND ss.COURSE_PERIOD_ID='$THIS_RET[COURSE_PERIOD_ID]' ";
 
     $res = DBGet(DBQuery($sql));
+
+    return $THIS_RET['TOTAL_SEATS'] - $res[1]['TOT'];
+}
+function _calcOpenSeatsNew($null) {
+    global $THIS_RET;
+    $sql = "SELECT COUNT(*) as TOT
+				FROM schedule ss,students s,student_enrollment ssm
+				WHERE (('" . DBDate() . "' BETWEEN ss.START_DATE AND ss.END_DATE OR ss.END_DATE IS NULL) or (ss.END_DATE=(SELECT MAX(END_DATE) from  course_periods where COURSE_ID='$THIS_RET[COURSE_ID]'))) AND (('" . DBDate() . "' BETWEEN ssm.START_DATE AND ssm.END_DATE OR ssm.END_DATE IS NULL)) AND s.STUDENT_ID=ss.STUDENT_ID AND s.STUDENT_ID=ssm.STUDENT_ID AND ssm.SYEAR='" . UserSyear() . "' AND ssm.SCHOOL_ID='" . UserSchool() . "' AND ss.COURSE_ID='$THIS_RET[COURSE_ID]' ";
+
+    $res = DBGet(DBQuery($sql));
+
     return $THIS_RET['TOTAL_SEATS'] - $res[1]['TOT'];
 }
 

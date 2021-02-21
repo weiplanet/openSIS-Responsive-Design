@@ -27,6 +27,8 @@
 #
 #***************************************************************************************
 include('../../RedirectModulesInc.php');
+include('lang/language.php');
+
 
 if (clean_param($_REQUEST['values'], PARAM_NOTAGS) && ($_POST['values'] || $_REQUEST['ajax']) && AllowEdit()) {
     foreach ($_REQUEST['values'] as $id => $columns) {
@@ -50,7 +52,7 @@ if (clean_param($_REQUEST['values'], PARAM_NOTAGS) && ($_POST['values'] || $_REQ
                 $period_etime = explode(":", $period_etime[1]['END_TIME']);
                 $period_etime = $period_etime[0] . ':' . $period_etime[1];
                 if ($columns['START_TIME'] == $period_etime) {
-                    $err_msg = "Start time and end time can not be same.";
+                    $err_msg = _startTimeAndEndTimeCanNotBeSame;
                     break;
                 }
             }
@@ -59,16 +61,16 @@ if (clean_param($_REQUEST['values'], PARAM_NOTAGS) && ($_POST['values'] || $_REQ
                 $period_etime = explode(":", $period_etime[1]['START_TIME']);
                 $period_etime = $period_etime[0] . ':' . $period_etime[1];
                 if ($columns['END_TIME'] == $period_etime) {
-                    $err_msg = "Start time and end time can not be same.";
+                    $err_msg = _startTimeAndEndTimeCanNotBeSame;
                     break;
                 }
             }
             if ($id != 'new' && $columns['END_TIME'] != '' && $columns['START_TIME'] != '' && $columns['START_TIME'] == $columns['END_TIME']) {
-                $err_msg = "Start time and end time can not be same.";
+                $err_msg = _startTimeAndEndTimeCanNotBeSame;
                 break;
             }
             if ($id != 'new') {
-                $exist_pr = DBGet(DBQuery('SELECT TITLE,SHORT_NAME,SORT_ORDER,START_TIME,END_TIME FROM  school_periods WHERE period_id=\'' . $id . '\''));
+                $exist_pr = DBGet(DBQuery('SELECT * FROM  school_periods WHERE period_id=\'' . $id . '\''));
                 if (isset($_REQUEST['values'][$id]['TITLE']) && $_REQUEST['values'][$id]['TITLE'] != '' || isset($_REQUEST['values'][$id]['SHORT_NAME']) && $_REQUEST['values'][$id]['SHORT_NAME'] != '') {
 
                     $sql = 'SELECT TITLE,SHORT_NAME,SORT_ORDER,START_TIME,END_TIME FROM  school_periods WHERE SYEAR= \'' . UserSyear() . '\' AND SCHOOL_ID=\'' . UserSchool() . '\' and period_id<>\'' . $id . '\'';
@@ -93,6 +95,7 @@ if (clean_param($_REQUEST['values'], PARAM_NOTAGS) && ($_POST['values'] || $_REQ
             //  echo '<pre>';
             //  print_r($columns);
             //  echo '</pre>';
+            if((isset($_REQUEST['values'][$id]['TITLE']) && $_REQUEST['values'][$id]['TITLE'] != $exist_pr[1]['TITLE']) || (isset($_REQUEST['values'][$id]['SHORT_NAME']) && $_REQUEST['values'][$id]['SHORT_NAME'] != $exist_pr[1]['SHORT_NAME']) || (isset($_REQUEST['values'][$id]['SHORT_ORDER']) && $_REQUEST['values'][$id]['SHORT_ORDER'] != $exist_pr[1]['SHORT_ORDER']) || (isset($_REQUEST['values'][$id]['START_TIME']) && strtotime($_REQUEST['values'][$id]['START_TIME']) != strtotime($exist_pr[1]['START_TIME'])) || (isset($_REQUEST['values'][$id]['END_TIME']) && strtotime($_REQUEST['values'][$id]['END_TIME']) != strtotime($exist_pr[1]['END_TIME'])) || (isset($_REQUEST['values'][$id]['IGNORE_SCHEDULING']) && $_REQUEST['values'][$id]['IGNORE_SCHEDULING'] != $exist_pr[1]['IGNORE_SCHEDULING']) || (isset($_REQUEST['values'][$id]['ATTENDANCE']) && $_REQUEST['values'][$id]['ATTENDANCE'] != $exist_pr[1]['ATTENDANCE'])){
                 $sql = 'UPDATE school_periods SET ';
                 $title_change = '';
                 foreach ($columns as $column => $value) {
@@ -106,7 +109,7 @@ if (clean_param($_REQUEST['values'], PARAM_NOTAGS) && ($_POST['values'] || $_REQ
 
 
                             if ($per_attn_check[1]['TOTAL'] > 0) {
-                                $err = 'Cannot modify Used for Attendance as period is associated';
+                                $err = _cannotModifyUsedForAttendanceAsPeriodIsAssociated;
                                 $go = false;
                             } else {
                                 $sql .= $column . '=\'' . str_replace("'", "''", str_replace("\'", "'", $value)) . '\',';
@@ -124,7 +127,7 @@ if (clean_param($_REQUEST['values'], PARAM_NOTAGS) && ($_POST['values'] || $_REQ
                         } else {
                             $check_for_change=DBGet(DBQuery('SELECT COUNT(*) AS REC_EX FROM school_periods WHERE PERIOD_ID='.$id.' AND '.$column.'=\''.$value.'\'' ));
                             if($check_for_change[1]['REC_EX']==0){
-                                $err = 'Cannot modify start time or end time as period is associated';
+                                $err = _cannotModifyStartTimeOrEndTimeAsPeriodIsAssociated;
                                 $go = false;
                             }
                             
@@ -176,7 +179,7 @@ if (clean_param($_REQUEST['values'], PARAM_NOTAGS) && ($_POST['values'] || $_REQ
                     }
                 }
                 if ($not_up == 1) {
-                    $err_msg = " Already a period is created with same title or shortname.";
+                    $err_msg = alreadyAPeriodIsCreatedWithSameTitleOrShortname.".";
                 }
 
                 # -------------------------- Length Update Start -------------------------- #
@@ -195,6 +198,8 @@ if (clean_param($_REQUEST['values'], PARAM_NOTAGS) && ($_POST['values'] || $_REQ
                 $res_length_update = DBQuery($sql_length_update);
 
                 # --------------------------- Length Update End --------------------------- #
+                }
+            
             }
             else {
 
@@ -208,22 +213,22 @@ if (clean_param($_REQUEST['values'], PARAM_NOTAGS) && ($_POST['values'] || $_REQ
                     $end_time[$i] = strtotime($periods[$i]['END_TIME']);
                 }
                 if (in_array(strtoupper(str_replace(' ', '', $columns['TITLE'])), $p_title) || in_array(strtoupper(str_replace(' ', '', $columns['SHORT_NAME'])), $shortname)) {
-                    $err = " Already a period is created with same title or shortname.";
+                    $err = alreadyAPeriodIsCreatedWithSameTitleOrShortname.".";
                     break;
                 } elseif ($columns['START_TIME']) {
-                    $sql_end_ex = 'SELECT TITLE,SHORT_NAME,SORT_ORDER,START_TIME,END_TIME FROM  school_periods WHERE SYEAR= \'' . UserSyear() . '\' AND SCHOOL_ID=\'' . UserSchool() . '\' AND END_TIME=\'' . $columns['START_TIME'] . ':00\'';
-                    $sql_end_ex_count = DBGET(DBQuery($sql_end_ex));
-                    if (count($sql_end_ex_count) > 0) {
-                        $err = " End time of a period cannot be same with another period start time.";
-                        break;
-                    } else {
+//                    $sql_end_ex = 'SELECT TITLE,SHORT_NAME,SORT_ORDER,START_TIME,END_TIME FROM  school_periods WHERE SYEAR= \'' . UserSyear() . '\' AND SCHOOL_ID=\'' . UserSchool() . '\' AND END_TIME=\'' . $columns['START_TIME'] . ':00\'';
+//                    $sql_end_ex_count = DBGET(DBQuery($sql_end_ex));
+//                    if (count($sql_end_ex_count) > 0) {
+//                        $err = " End time of a period cannot be same with another period start time.";
+//                        break;
+//                    } else {
 
                         $sql = 'INSERT INTO school_periods ';
                         $fields = 'SCHOOL_ID,SYEAR,';
                         $values = '\'' . UserSchool() . '\',\'' . UserSyear() . '\',';
                         $go = 0;
                         if ($columns['START_TIME'] == $columns['END_TIME']) {
-                            $err_msg = " Start time and end time can not be same.";
+                            $err_msg = startTimeAndEndTimeCanNotBeSame.".";
                             break;
                         }
                         foreach ($columns as $column => $value) {
@@ -260,23 +265,23 @@ if (clean_param($_REQUEST['values'], PARAM_NOTAGS) && ($_POST['values'] || $_REQ
                         $res_up = DBQuery($sql_up);
 
                         # -------------------------------------------------------------------------- #
-                    }
+                    //}
                 }
             }
         }
     }
     if ($err)
-        echo '<font style="color:red"><b>' . $err . '</b></font>';
+        echo '<div class="alert alert-danger">' . $err . '</div>';
 }
 
-DrawBC("School Setup <i class=\"icon-arrow-right13\"></i> " . ProgramTitle());
+DrawBC(""._schoolSetup." <i class=\"icon-arrow-right13\"></i> " . ProgramTitle());
 
 if (clean_param($_REQUEST['modfunc'], PARAM_ALPHAMOD) == 'remove' && AllowEdit()) {
     $prd_id = paramlib_validation($colmn = PERIOD_ID, $_REQUEST[id]);
     $has_assigned_RET = DBGet(DBQuery('SELECT COUNT(*) AS TOTAL_ASSIGNED FROM course_period_var WHERE PERIOD_ID=\'' . $prd_id . '\''));
     $has_assigned = $has_assigned_RET[1]['TOTAL_ASSIGNED'];
     if ($has_assigned > 0) {
-        UnableDeletePrompt('Cannot delete because course periods are created on this period.');
+        UnableDeletePrompt( _cannotDeleteBecauseCoursePeriodsAreCreatedOnThisPeriod.'.');
     } else {
         if (DeletePrompt_Period('period')) {
             DBQuery('DELETE FROM school_periods WHERE PERIOD_ID=\'' . $prd_id . '\'');
@@ -297,7 +302,7 @@ if ($_REQUEST['modfunc'] != 'remove') {
 
 
 
-    $columns = array('TITLE' => 'Title', 'SHORT_NAME' => 'Short Name', 'SORT_ORDER' => 'Sort Order', 'START_TIME' => 'Start Time', 'END_TIME' => 'End Time', 'LENGTH' => 'Length <div></div>(minutes)', 'ATTENDANCE' => 'Used for <div></div>Attendance', 'IGNORE_SCHEDULING' => 'Ignore for <div></div>Scheduling');
+    $columns = array('TITLE' =>_title, 'SHORT_NAME' =>_shortName, 'SORT_ORDER' =>_sortOrder, 'START_TIME' =>_startTime, 'END_TIME' =>_endTime, 'LENGTH' => _length.'<div></div>('._minutes.')', 'ATTENDANCE' => _usedFor.' <div></div>'._attendance, 'IGNORE_SCHEDULING' => _ignoreFor.' <div></div>'._scheduling);
 
 
     $link['add']['html'] = array('TITLE' => _makeTextInput('', 'TITLE'), 'SHORT_NAME' => _makeTextInput('', 'SHORT_NAME'), 'SORT_ORDER' => _makeTextInputMod2('', 'SORT_ORDER'), 'START_TIME' => _makeTimeInput('', 'START_TIME'), 'END_TIME' => _makeTimeInputEnd('', 'END_TIME'), 'ATTENDANCE' => _makeCheckboxInput('', 'ATTENDANCE'), 'IGNORE_SCHEDULING' => _makeCheckboxInput('', 'IGNORE_SCHEDULING'));
@@ -306,7 +311,7 @@ if ($_REQUEST['modfunc'] != 'remove') {
     $link['remove']['variables'] = array('id' => 'PERIOD_ID');
     if ($err_msg) {
         echo '<div class="alert bg-danger alert-styled-left">';
-        echo '<button type="button" class="close" data-dismiss="alert"><span>×</span><span class="sr-only">Close</span></button>' . $err_msg . '</div>';
+        echo '<button type="button" class="close" data-dismiss="alert"><span>×</span><span class="sr-only">'._close.'</span></button>' . $err_msg . '</div>';
 
         unset($err_msg);
     }
@@ -322,7 +327,7 @@ if ($_REQUEST['modfunc'] != 'remove') {
     echo '<input type="hidden" name="h1" id="h1" value="' . $period_id . '">';
 
     echo '<div id="students" class="panel panel-white">';
-    ListOutputPeriod($periods_RET, $columns, 'Period', 'Periods', $link);
+    ListOutputPeriod($periods_RET, $columns, period, periods, $link);
 
     $count = count($periods_RET);
     if ($count != 0) {
@@ -332,7 +337,7 @@ if ($_REQUEST['modfunc'] != 'remove') {
         echo "<input type=hidden id=count name=count value=$maxPeriodId />";
     } else
         echo "<input type=hidden id=count name=count value=$count />";
-    echo '<hr class="no-margin"/><div class="panel-body text-right">' . SubmitButton('Save', '', 'class="btn btn-primary" onclick="formcheck_school_setup_periods();"') . '</div>';
+    echo '<hr class="no-margin"/><div class="panel-body text-right">' . SubmitButton(_save, '', 'id="setupPeriodsBtn" class="btn btn-primary" onclick="formcheck_school_setup_periods(this);"') . '</div>';
     echo '</div>';
     echo '</FORM>';
 }
@@ -391,7 +396,7 @@ function _makeCheckboxInput($value, $name) {
     else
         $id = 'new';
 
-    return CheckboxInput($value, 'values[' . $id . '][' . $name . ']', '', '', ($id == 'new' ? true : false), '<i class="icon-checkbox-checked"></i>', '<i class="icon-checkbox-unchecked"></i>');
+    return '<div class="text-center">'.CheckboxInputSwitch($value, 'values[' . $id . '][' . $name . ']', '', '', ($id == 'new' ? true : false), 'Yes', 'No', '', 'switch-success').'</div>';
 }
 
 

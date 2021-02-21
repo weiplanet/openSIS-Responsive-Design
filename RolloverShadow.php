@@ -33,7 +33,21 @@ $next_start_date=$_SESSION['roll_start_date'];
 $next_s_start_date=$_SESSION['roll_s_start_date'];
 $next_s_end_date=$_SESSION['roll_s_end_date'];
 //exit;
-$tables = array('staff'=>'users','school_periods'=>'School Periods','school_years'=>'Marking Periods','school_calendars'=>'Calendars','report_card_grade_scales'=>'Report Card Grade Codes','course_subjects'=>'Subjects','courses'=>'Courses','course_periods'=>'Course Periods','student_enrollment'=>'Students','honor_roll'=>'Honor Roll Setup','attendance_codes'=>'Attendance Codes','student_enrollment_codes'=>'Student Enrollment Codes','report_card_comments'=>'Report Card Comment Codes','NONE'=>'none');
+$tables = array('staff'=>_users,
+'school_periods'=>_schoolPeriods,
+'school_years'=>_markingPeriods,
+'school_calendars'=>_calendars,
+'report_card_grade_scales'=>_reportCardGradeCodes,
+'course_subjects'=>_subjects,
+'courses'=>_courses,
+'course_periods'=>_coursePeriods,
+'student_enrollment'=>_students,
+'honor_roll'=>_honorRollSetup,
+'attendance_codes'=>_attendanceCodes,
+'student_enrollment_codes'=>_studentEnrollmentCodes,
+'report_card_comments'=>_reportCardCommentCodes,
+'NONE'=>_none,
+);
 $no_school_tables = array('student_enrollment_codes'=>true,'staff'=>true);
 switch($table)
 {
@@ -85,7 +99,7 @@ $calendars_RET = DBGet(DBQuery('SELECT CALENDAR_ID,ROLLOVER_ID FROM school_calen
                     break;
 
 		case 'school_years':
-                        
+                       $rollover_shadow_school_yr= "";
 			DBQuery('DELETE FROM school_progress_periods WHERE SYEAR=\''.$next_syear.'\' AND SCHOOL_ID=\''.UserSchool().'\'');
 			DBQuery('DELETE FROM school_quarters WHERE SYEAR=\''.$next_syear.'\' AND SCHOOL_ID=\''.UserSchool().'\'');
 			DBQuery('DELETE FROM school_semesters WHERE SYEAR=\''.$next_syear.'\' AND SCHOOL_ID=\''.UserSchool().'\'');
@@ -161,6 +175,7 @@ $calendars_RET = DBGet(DBQuery('SELECT CALENDAR_ID,ROLLOVER_ID FROM school_calen
                     break;
 
 		case 'courses':
+         $rollover_shadow_course= "";
                     DBQuery('DELETE FROM courses WHERE SYEAR=\''.$next_syear.'\' AND SCHOOL_ID=\''.UserSchool().'\'');
                     DBQuery('INSERT INTO courses (SYEAR,SUBJECT_ID,SCHOOL_ID,GRADE_LEVEL,TITLE,SHORT_NAME,ROLLOVER_ID) SELECT SYEAR+1,(SELECT SUBJECT_ID FROM course_subjects s WHERE s.SYEAR=c.SYEAR+1 AND s.ROLLOVER_ID=c.SUBJECT_ID),SCHOOL_ID,GRADE_LEVEL,TITLE,SHORT_NAME,COURSE_ID FROM courses c WHERE SYEAR=\''.UserSyear().'\' AND SCHOOL_ID=\''.UserSchool().'\'');
                     $exists_RET[$table] = DBGet(DBQuery('SELECT count(*) AS COUNT from '.$table.' WHERE SYEAR=\''.$next_syear.'\''.(!$no_school_tables[$table]?' AND SCHOOL_ID=\''.UserSchool().'\'':'')));
@@ -169,7 +184,7 @@ $calendars_RET = DBGet(DBQuery('SELECT CALENDAR_ID,ROLLOVER_ID FROM school_calen
                     break;
                    
                     case 'course_periods':
-
+                     $rollover_shadow_course_periods= "";
 
 			
 

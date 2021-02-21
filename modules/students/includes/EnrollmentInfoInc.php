@@ -53,7 +53,7 @@ if (($_REQUEST['month_values'] && ($_POST['month_values'] || $_REQUEST['ajax']))
             unset($_REQUEST['day_values']['student_enrollment']['new']);
             unset($_REQUEST['month_values']['student_enrollment']['new']);
             unset($_REQUEST['year_values']['student_enrollment']['new']);
-            echo ErrorMessage(array('The student is already enrolled on that date, and could not be enrolled a second time on the date you specified.  Please fix, and try enrolling the student again.'));
+            echo ErrorMessage(array(_theStudentIsAlreadyEnrolledOnThatDateAndCouldNotBeEnrolledASecondTimeOnTheDateYouSpecifiedPleaseFixAndTryEnrollingTheStudentAgain));
         }
     }
 
@@ -140,14 +140,14 @@ if (($_REQUEST['month_values'] && ($_POST['month_values'] || $_REQUEST['ajax']))
 
                                 //SaveData($iu_extra, '', $field_names);
                             } else {
-                                echo '<div class="alert bg-danger alert-styled-left">Student cannot be dropped because student has got attendance till ' . date('m-d-Y', strtotime($max_at_dt)) . '</div>';
+                                echo '<div class="alert bg-danger alert-styled-left">'._studentCannotBeDroppedBecauseStudentHasGotAttendanceTill.'' . date('m-d-Y', strtotime($max_at_dt)) . '</div>';
                             }
                         } else {
 
                             $get_details = DBGet(DBQuery('SELECT max(START_DATE) AS START_DATE FROM student_enrollment WHERE STUDENT_ID=' . UserStudentID()));
 
                             if (strtotime($get_details[1]['START_DATE']) > strtotime($_REQUEST['values'][$table][$id][$column])) {
-                                echo '<div class="alert bg-danger alert-styled-left">Student drop date cannot be before student enrollment date </div>';
+                                echo '<div class="alert bg-danger alert-styled-left">'._studentDropDateCannotBeBeforeStudentEnrollmentDate.' </div>';
                             } else {
                                // SaveData($iu_extra, '', $field_names);
                             }
@@ -161,7 +161,7 @@ if (($_REQUEST['month_values'] && ($_POST['month_values'] || $_REQUEST['ajax']))
                         }
                     }
                 } else {
-                    echo '<div class="alert bg-danger alert-styled-left">Please enter proper drop date.Drop date must be greater than student enrollment date.</div>';
+                    echo '<div class="alert bg-danger alert-styled-left">'._pleaseEnterProperDropDateDropDateMustBeGreaterThanStudentEnrollmentDate.'</div>';
                 }
             }
         }
@@ -189,7 +189,6 @@ $date_counter = 1;
 unset($THIS_RET);
 $RET = DBGet(DBQuery('SELECT e.DROP_CODE as DC,e.SYEAR, s.FIRST_NAME,s.LAST_NAME,s.GENDER, e.ID,e.GRADE_ID,e.ENROLLMENT_CODE,e.START_DATE,e.DROP_CODE,e.END_DATE,e.END_DATE AS END,e.SCHOOL_ID,e.NEXT_SCHOOL,e.CALENDAR_ID FROM student_enrollment e,students s WHERE e.STUDENT_ID=\'' . UserStudentID() . '\'  AND e.STUDENT_ID=s.STUDENT_ID ORDER BY e.START_DATE'), $functions);
 
-
 if (count($RET)) {
     $date_counter = $date_counter + 1;
     foreach ($RET as $in => $value) {
@@ -213,10 +212,18 @@ if (count($RET)) {
 }
 
 
-$columns = array('START_DATE' => 'Start Date ', 'ENROLLMENT_CODE' => 'Enrollment Code', 'END_DATE' => 'Drop Date', 'DROP_CODE' => 'Drop Code', 'SCHOOL_ID' => 'School');
+$columns = array('START_DATE' =>_startDate,
+ 'ENROLLMENT_CODE' =>_enrollmentCode,
+ 'END_DATE' =>_dropDate,
+ 'DROP_CODE' =>_dropCode,
+ 'SCHOOL_ID' =>_school,
+);
 
 $schools_RET = DBGet(DBQuery('SELECT ID,TITLE FROM schools WHERE ID!=\'' . UserSchool() . '\''));
-$next_school_options = array(UserSchool() => 'Next grade at current school', '0' => 'Retain', '-1' => 'Do not enroll after this school year');
+$next_school_options = array(UserSchool() =>_nextGradeAtCurrentSchool,
+ '0' =>_retain,
+ '-1' =>_doNotEnrollAfterThisSchoolYear,
+);
 if (count($schools_RET)) {
     foreach ($schools_RET as $school)
         $next_school_options[$school['ID']] = $school['TITLE'];
@@ -233,6 +240,15 @@ if (count($calendars_RET)) {
         $calendar_options[$calendar['CALENDAR_ID']] = $calendar['TITLE'];
 }
 
+$get_latest_enrollment = DBGet(DBQuery('SELECT * FROM `student_enrollment` WHERE `id` = (SELECT MAX(`id`) FROM `student_enrollment` WHERE `student_id` = \''.UserStudentID().'\')'));
+
+if($get_latest_enrollment[1]['SCHOOL_ID'] != UserSchool() && $get_latest_enrollment[1]['CALENDAR_ID'] != '')
+{
+    $get_calendar = DBGet(DBQuery('SELECT * FROM `school_calendars` WHERE `calendar_id` = \''.$get_latest_enrollment[1]['CALENDAR_ID'].'\''));
+
+    $calendar_options[$get_calendar[1]['CALENDAR_ID']] = $get_calendar[1]['TITLE'];
+}
+
 if ($_REQUEST['student_id'] != 'new') {
     if (count($RET))
         $id = $RET[count($RET)]['ID'];
@@ -242,7 +258,16 @@ if ($_REQUEST['student_id'] != 'new') {
     if ($id != 'new')
         $next_school = $RET[count($RET)]['NEXT_SCHOOL'];
     if ($id != 'new')
-        $calendar = $RET[count($RET)]['CALENDAR_ID'];
+    {
+        // $calendar = $RET[count($RET)]['CALENDAR_ID'];
+        foreach($RET as $one_set)
+        {
+            if($one_set['SYEAR'] == UserSyear())
+            {
+                $calendar = $one_set['CALENDAR_ID'];
+            }
+        }
+    }
     $div = true;
 }
 else {
@@ -256,27 +281,27 @@ else {
 
 echo '</div>';
 
-echo '<h5 class="text-primary">Enrollment Information</h5>';
+echo '<h5 class="text-primary">'._enrollmentInformation.'</h5>';
 
 echo '<input type=hidden id=cal_stu_id value=' . $id . ' />';
 
 echo '<div class="row">';
-echo '<div class="col-md-6"><div class="form-group"><label class="control-label col-lg-4 text-right" for="values[student_enrollment][' . $id . '][CALENDAR_ID]">Calendar <span class="text-danger">*</span></label><div class="col-lg-8">' . SelectInput($calendar, "values[student_enrollment][$id][CALENDAR_ID]", (!$calendar || !$div ? '' : '') . '' . (!$calendar || !$div ? '' : ''), $calendar_options, false, '', $div) . '</div></div></div>';
-echo '<div class="col-md-6"><div class="form-group"><label class="control-label col-lg-4 text-right" for="values[student_enrollment][' . $id . '][NEXT_SCHOOL]">Rolling/Retention Options</label><div class="col-lg-8">' . SelectInput($next_school, "values[student_enrollment][$id][NEXT_SCHOOL]", (!$next_school || !$div ? '' : '') . '' . (!$next_school || !$div ? '' : ''), $next_school_options, false, '', $div) . '</div></div></div>';
+echo '<div class="col-md-6"><div class="form-group"><label class="control-label col-lg-4 text-right" for="values[student_enrollment][' . $id . '][CALENDAR_ID]">'._calendar.' <span class="text-danger">*</span></label><div class="col-lg-8">' . SelectInput($calendar, "values[student_enrollment][$id][CALENDAR_ID]", (!$calendar || !$div ? '' : '') . '' . (!$calendar || !$div ? '' : ''), $calendar_options, false, '', $div) . '</div></div></div>';
+echo '<div class="col-md-6"><div class="form-group"><label class="control-label col-lg-4 text-right" for="values[student_enrollment][' . $id . '][NEXT_SCHOOL]">'._rollingRetentionOptions.'</label><div class="col-lg-8">' . SelectInput($next_school, "values[student_enrollment][$id][NEXT_SCHOOL]", (!$next_school || !$div ? '' : '') . '' . (!$next_school || !$div ? '' : ''), $next_school_options, false, '', $div) . '</div></div></div>';
 echo '</div>'; //.row
 
 echo '<hr class="no-margin-bottom"/>';
 
-if ($_REQUEST['student_id'] && $_REQUEST['student_id'] != 'new') {
+$enrol_id=$_REQUEST['enrollment_id'];
+if ($_REQUEST['student_id'] && $_REQUEST['student_id'] != 'new' && $_REQUEST['values']['student_enrollment'][$enrol_id]['END_DATE']!='') {
 
-
+    
     $sql_enroll_id = DBGet(DBQuery('SELECT MAX(ID) AS M_ID FROM student_enrollment WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SYEAR=\'' . UserSyear() . '\' AND SCHOOL_ID=\'' . UserSchool() . '\''));
 
     $enroll_id = $sql_enroll_id[1]['M_ID'];
 
     $end_date = DBGet(DBQuery('SELECT END_DATE FROM student_enrollment WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SYEAR=\'' . UserSyear() . '\' AND SCHOOL_ID=\'' . UserSchool() . '\' AND ID=\'' . $enroll_id . '\''));
 
-    // print_r($_REQUEST);
     if ($end_date[1]['END_DATE']) {
         $end_date = $end_date[1]['END_DATE'];
         DBQuery('UPDATE schedule SET END_DATE=\'' . $end_date . '\' WHERE STUDENT_ID=\'' . $_REQUEST['student_id'] . '\' AND SYEAR=\'' . UserSyear() . '\' AND SCHOOL_ID=\'' . UserSchool() . '\' AND (END_DATE IS NULL OR \'' . $end_date . '\' < END_DATE )');
@@ -290,7 +315,7 @@ if ($_REQUEST['student_id'] != 'new') {
     else
         $id = 'new';
     echo '<div id="students" class="table-responsive">';
-    ListOutput($RET, $columns, 'Enrollment Record', 'Enrollment Records', $link);
+    ListOutput($RET, $columns,  _enrollmentRecord,_enrollmentRecords, $link);
     //echo "</div>";
     if ($id != 'new')
         $next_school = $RET[count($RET)]['NEXT_SCHOOL'];
@@ -301,7 +326,7 @@ if ($_REQUEST['student_id'] != 'new') {
 else {
     $id = 'new';
     echo '<div id="students">';
-    ListOutputMod($RET, $columns, 'Enrollment Record', 'Enrollment Records', $link, array(), array('count' => false));
+    ListOutputMod($RET, $columns, enrollmentRecord,enrollmentRecords, $link, array(), array('count' =>false));
     echo "</div>";
     $next_school = UserSchool();
     $calendar = $calendars_RET[1]['CALENDAR_ID'];
